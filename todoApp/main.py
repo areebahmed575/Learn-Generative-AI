@@ -2,8 +2,19 @@ from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine
 from pydantic import BaseModel
-from models import Todo
+from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, Integer, String
+from database import engine
+
 app = FastAPI()
+
+Base = declarative_base()
+
+class Todo(Base):
+    __tablename__ = "todos"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    description = Column(String, index=True)
 
 class Todos(BaseModel):
     name: str
@@ -28,10 +39,11 @@ def get_db():
 
 @app.post("/todos/")
 def create_todo(todo: Todos, db: Session = Depends(get_db)):
-    db.add(todo)
+    db_todo = Todo(name=todo.name, description=todo.description)
+    db.add(db_todo)
     db.commit()
-    db.refresh(todo)
-    return todo
+    db.refresh(db_todo)
+    return db_todo
 
 @app.put("/todos/{todo_id}")
 def update_todo(todo_id: int, updated_todo: TodoUpdate, db: Session = Depends(get_db)):

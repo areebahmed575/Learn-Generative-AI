@@ -1,12 +1,6 @@
 from sqlalchemy import Column, Integer, String
-from database import Base,engine
-
-class Todo(Base):
-    __tablename__ = "todos"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    description = Column(String, index=True)
-
+from database import engine
+from main import Base
 
 def create_tables():
     Base.metadata.create_all(engine)    
