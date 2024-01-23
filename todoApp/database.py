@@ -1,8 +1,14 @@
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('postgresql://areebstudent567:g4bOtYWUfE9s@ep-fancy-glitter-82049478.us-east-2.aws.neon.tech/todo?sslmode=require', echo=True)
+
+engine = create_engine('postgresql://areebstudent567:g4bOtYWUfE9s@ep-fancy-glitter-82049478.us-east-2.aws.neon.tech/todos?sslmode=require', echo=True)
+
+
+
+Base = declarative_base()
+
 
 SessionLocal = sessionmaker(bind=engine)
 
