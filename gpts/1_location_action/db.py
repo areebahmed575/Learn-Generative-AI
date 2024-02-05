@@ -24,7 +24,7 @@ class Location(SQLModel, table=True):
 database_url = "postgresql://areebstudent567:g4bOtYWUfE9s@ep-fancy-glitter-82049478.us-east-2.aws.neon.tech/sqlmodel?sslmode=require"
 
 
-engine = create_engine(database_url)
+engine = create_engine(database_url) #
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)

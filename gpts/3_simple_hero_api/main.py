@@ -14,7 +14,7 @@ class Hero(SQLModel, table=True):
 database_url = "postgresql://areebstudent567:g4bOtYWUfE9s@ep-fancy-glitter-82049478.us-east-2.aws.neon.tech/sqlmodel?sslmode=require"
 
 connect_args = {"check_same_thread": False}
-engine = create_engine(database_url)
+engine = create_engine(database_url) #,echo=true means k jo query chal rahe h woh console mai dhekaye
 # engine = create_engine(sqlite_url, echo=True, connect_args=connect_args)
 
 
