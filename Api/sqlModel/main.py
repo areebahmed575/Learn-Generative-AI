@@ -119,7 +119,7 @@ def update_age():
 
 def delete_first_name():
     session = Session(engine)
-    statement = select(Hero).where(Hero.name == "Malaika Tanvir")
+    statement = select(Hero).where(Hero.name == "Areeb Ahmed")
     results = session.exec(statement).first()
     session.delete(results)
     session.commit()
@@ -127,7 +127,7 @@ def delete_first_name():
 
 def delete_all_name():
     session = Session(engine)
-    statement = select(Hero).where(Hero.name == "Malaika Tanvir")
+    statement = select(Hero).where(Hero.name == "Areeb Ahmed")
     results = session.exec(statement).all()
     for row in results:
         session.delete(row)
