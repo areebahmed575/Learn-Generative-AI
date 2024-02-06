@@ -16,7 +16,7 @@ engine = create_engine(database_connection,echo=True) #,echo=true means k jo que
 
 # hero_1 = Hero(name="Areeb Ahmed", secret_name="AA")
 # hero_2 = Hero(name="Ali Khan", secret_name="AK")
-# hero_3 = Hero(name="Malaika Tanvir", secret_name="MT",age=22)
+
 
 # with Session(engine) as session:
 #     session.add(hero_1)
@@ -28,12 +28,12 @@ engine = create_engine(database_connection,echo=True) #,echo=true means k jo que
 def create_hero():
     hero_1 = Hero(name="Areeb Ahmed", secret_name="AA")
     hero_2 = Hero(name="Ali Khan", secret_name="AK")
-    hero_3 = Hero(name="Malaika Tanvir", secret_name="MT",age=22)
+    
 
     session = Session(engine) 
     session.add(hero_1)
     session.add(hero_2)
-    session.add(hero_3)
+    
     session.commit()
     session.close()
   
