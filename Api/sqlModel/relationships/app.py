@@ -49,6 +49,14 @@ def create_members_in_team():
        session.add(team_earth)
        session.commit()
 
+def select_teams():
+    with Session(engine) as session:
+        statement = select(Team).where(Team.name == "Air Fighters")
+        results = session.exec(statement)
+        teams = results.first()
+        print("Teams:",teams)
+        print("Teams members:",teams.members)
+
 
 def update():
     with Session(engine) as session:
@@ -65,6 +73,6 @@ def update():
 
 
 if __name__ == "__main__": 
-    create_members_in_team()
+    select_teams()
 
         

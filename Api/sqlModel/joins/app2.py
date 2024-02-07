@@ -76,5 +76,22 @@ def select_full_join():
 
 
 
+#remove data connections
+def create_heroes():
+    with Session(engine) as session:
+
+        statement = select(Members).join(Team).where(Members.name == "Spider Man")
+        results = session.exec(statement).first()
+
+        results.team_id = None
+        session.add(results)
+        session.commit()
+        
+        print("No longer Preventer:", results)
+
+        
+
+
+
 if __name__ == "__main__": 
-    create()
+    create_heroes()
