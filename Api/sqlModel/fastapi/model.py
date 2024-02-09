@@ -20,18 +20,20 @@ class TeamUpdate(SQLModel):
     headquarter : str | None = None
 
 
-
+# class TeamResponseWithHeroes(TeamResponse):
+#      hero : HeroResponse
+#      #hero : list[HeroResponse] = []
     
 
 class HeroBase(SQLModel):
     name:str = Field(index=True)
     secret_name:str
-    
+    team_id:int|None = Field(default=None, foreign_key="team.id")
 
 class Hero(HeroBase,table=True):
     id:int|None =Field(default=None,primary_key=True)
     description:str|None=None
-    team_id:int|None=Field(default=None, foreign_key="team.id")
+    
     team:Team = Relationship(back_populates="heroes")
     
 class HeroCreate(HeroBase):
@@ -48,3 +50,6 @@ class HeroUpdate(SQLModel):
     name:str|None=None
     secret_name:str|None=None
     description:str|None=None
+
+class HeroResponseWithTeam(HeroResponse):
+         team : TeamResponse 
