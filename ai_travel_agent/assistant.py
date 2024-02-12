@@ -9,11 +9,13 @@ from openai import OpenAI
 from dotenv import load_dotenv, find_dotenv
 import streamlit as st
 from typing import Literal
-
+import os
 from functions import available_functions
 
 
-_: bool = load_dotenv(find_dotenv())  # read local .env file
+ 
+
+_: bool = load_dotenv(find_dotenv()) 
 
 client: OpenAI = OpenAI()
 
@@ -26,11 +28,48 @@ class Trip:
         self.thread: Thread | None = None
         self.run: Run | None = None
 
-       
+
+    def list_assistant(self):
+        assistant_list = self.client.beta.assistants.list()
+        assistant_list_json = assistant_list.model_dump
+        return assistant_list_json['data'] if "data" in assistant_list_json else []
+    
+
+    def update_existing_assistant(self,assistant_id: str, new_instructions: str, tools: list, file_obj: list[str]):
+        self.assistant = self.client.beta.assistants.update(
+            assistant_id=assistant_id,
+            instructions=new_instructions,  
+            tools=tools,
+            file=file_obj,
+        ) 
+        return self.assistant
+
+    def find_and_set_assistant(self,name: str, instructions: str, tools: list[Tool], file_obj: list[str]):
+
+        assistant_list = self.list_assistant()
+        print("Retrieved assistants list...")
+        if self.assistant is not None:
+            
+           for assistant in assistant_list:
+                if assistant["name"] == name:
+                    print("Found assistant...",  assistant['name'] == name)
+                    print("Existing Assitant ID", assistant['id'])
+                    self.update_existing_assistant(assistant_id=assistant['id'], 
+                                                   new_instructions=name, 
+                                                   tools=tools, 
+                                                   file_obj=file_obj
+                                                   )
+
+                    break
+    
 
 
+    def create_assistant(self, name: str, instructions: str, tools: list, file_obj: list[str], model: str = "gpt-3.5-turbo-1106")-> Assistant:
 
-    def create_assistant(self, name: str, instructions:str,tools:list[Tool], model: str = "gpt-3.5-turbo-1106")-> Assistant:
+        self.find_and_set_assistant(name=name, 
+                                    instructions=instructions,
+                                    tools=tools, 
+                                    file_obj=[])
         if self.assistant is None :
             print("Creating an assitant")
             self.assistant = self.client.beta.assistants.create(
@@ -60,13 +99,14 @@ class Trip:
          
          if self.assistant is None:
             raise ValueError("Assistant is not set")
+         
          if self.thread is None:
              raise ValueError("Thread is not set")
          
          self.run=self.client.beta.runs.create(
               thread_id=self.thread.id,
               assistant_id=self.assistant.id,
-               instructions=instructions
+              instructions=instructions
          )
          return self.run
     

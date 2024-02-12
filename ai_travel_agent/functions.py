@@ -1,6 +1,6 @@
 import streamlit as st
 
-# Declare tools for openai assistant to use
+
 tools = [
     {
         "type": "function",
@@ -67,7 +67,7 @@ tools = [
 
 # We will update map state in session state
 def update_map(longitude: float, latitude: float, zoom: int):
-    """Update map to center on a particular location."""
+  
     st.session_state["map"] = {
         "latitude": latitude,
         "longitude": longitude,
@@ -78,9 +78,7 @@ def update_map(longitude: float, latitude: float, zoom: int):
 
 
 def add_markers(latitudes: list, longitudes: list, labels: list):
-    """OpenAI tool to update markers in-app
-    """
-
+   
     st.session_state["markers_state"] = {
         "latitudes": latitudes,
         "longitudes": longitudes,
@@ -94,4 +92,4 @@ available_functions = {
     "add_markers": add_markers,
 }
 
-SEED_INSTRUCTION = "You are a helpful travel assistant that can write and execute code, and has access to a digital map to display information. For any location user asks about or ask to navigate to, you should be able to display the location on the map. You should also be able to display multiple locations on the map. Ass annotations on map for suggestions and trip planning as well"
+INSTRUCTION = "You are a helpful travel assistant that can write and execute code, and has access to a digital map to display information. For any location user asks about or ask to navigate to, you should be able to display the location on the map. You should also be able to display multiple locations on the map. Ass annotations on map for suggestions and trip planning as well"
