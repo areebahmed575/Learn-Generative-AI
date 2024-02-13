@@ -29,71 +29,37 @@ class Trip:
         self.run: Run | None = None
 
 
-    def list_assistant(self):
-        assistant_list = self.client.beta.assistants.list()
-        assistant_list_json = assistant_list.model_dump
-        return assistant_list_json['data'] if "data" in assistant_list_json else []
-    
-
-    def update_existing_assistant(self,assistant_id: str, new_instructions: str, tools: list, file_obj: list[str]):
-        self.assistant = self.client.beta.assistants.update(
-            assistant_id=assistant_id,
-            instructions=new_instructions,  
-            tools=tools,
-            file=file_obj,
-        ) 
-        return self.assistant
-
-    def find_and_set_assistant(self,name: str, instructions: str, tools: list[Tool], file_obj: list[str]):
-
-        assistant_list = self.list_assistant()
-        print("Retrieved assistants list...")
-        if self.assistant is not None:
-            
-           for assistant in assistant_list:
-                if assistant["name"] == name:
-                    print("Found assistant...",  assistant['name'] == name)
-                    print("Existing Assitant ID", assistant['id'])
-                    self.update_existing_assistant(assistant_id=assistant['id'], 
-                                                   new_instructions=name, 
-                                                   tools=tools, 
-                                                   file_obj=file_obj
-                                                   )
-
-                    break
-    
-
-
     def create_assistant(self, name: str, instructions: str, tools: list, file_obj: list[str], model: str = "gpt-3.5-turbo-1106")-> Assistant:
 
-        self.find_and_set_assistant(name=name, 
-                                    instructions=instructions,
-                                    tools=tools, 
-                                    file_obj=[])
+        
         if self.assistant is None :
             print("Creating an assitant")
             self.assistant = self.client.beta.assistants.create(
                 name=name,
                 instructions=instructions,
                 tools=tools,
-                model=model
+                model=model,
+                file_ids=file_obj,
 
             ) 
             return self.assistant   
         
     def create_thread(self)-> Thread:
-            self.client.beta.threads.create()
+            self.thread = self.client.beta.threads.create()
             return self.thread   
             
 
-    def add_message_to_thread(self,role:Literal['user'], content: str):
-         if self.thread is not None:
+    def add_message_to_thread(self,role:Literal['user'], content: str) -> None:
+         if self.thread is None:
             raise ValueError("Thread is not set")
+         
          self.client.beta.threads.messages.create(
             thread_id=self.thread.id,
             role=role,
             content=content
          )
+
+        
 
     def create_run(self,instructions:str)-> Run:
          
@@ -103,11 +69,11 @@ class Trip:
          if self.thread is None:
              raise ValueError("Thread is not set")
          
-         self.run=self.client.beta.runs.create(
-              thread_id=self.thread.id,
-              assistant_id=self.assistant.id,
-              instructions=instructions
-         )
+         self.run = self.client.beta.threads.runs.create(
+            thread_id=self.thread.id,
+            assistant_id=self.assistant.id,
+            instructions=instructions
+        )
          return self.run
     
     
@@ -115,29 +81,26 @@ class Trip:
     def show_json(message, obj):
         print(message, json.loads(obj.model_dump_json()))
 
-    def messages(self):
-        messages = self.client.beta.threads.messages.list(
-            thread_id=self.thread.id)
-        return messages    
-
+    
 
     def get_run_result(self,run: Run, thread: Thread):
         if self.run is None:
             raise ValueError("Run is not set")
         
-        while run.status == ["completed","failed"]:
-            run_status= client.beta.threads.runs.retrieve(thread_id=self.thread.id,run_id=self.run.id)
-            # Add run steps retrieval here for debuging
-            run_steps = self.client.beta.threads.runs.steps.list(thread_id=self.thread.id, run_id=self.run.id)
-            self.show_json("Run Steps:", run_steps)
-            print(run_status.status ,'.....')
-            time.sleep(4)
+        while run.status not in ["completed","failed"]:
+            run_status= self.client.beta.threads.runs.retrieve(
+                thread_id=self.thread.id,
+                run_id=self.run.id
+            )
+            
+            time.sleep(3)
+            print(f"Status: {run_status.status}")
+
             if run_status.status == 'completed':
-                processed_response = self.process_messages()
+                processed_response = self.messages()
                 return processed_response
             elif run_status.status == 'requires_action' and run_status.required_action is not None:
                 print("Function Calling ...")
-                #st.sidebar.write(f"Function Calling ...")
                 self.call_required_functions(
                     run_status.required_action.submit_tool_outputs.model_dump())
             elif run.status == "failed":
@@ -147,6 +110,12 @@ class Trip:
                 print(f"Waiting for the Assistant to process...: {run.status}")
 
 
+    def messages(self):
+        messages = self.client.beta.threads.messages.list(
+            thread_id=self.thread.id)
+        return messages    
+
+    
     def call_required_functions(self, action_required):
         tool_outputs = []
         print("Calling tool call required functions...",action_required["tool_calls"])
@@ -158,26 +127,27 @@ class Trip:
             print('function_name', function_name)
             print('function_arguments', arguments)
 
-            #st.sidebar.write(f"Calling {function_name} with:")
+            print(f"Calling {function_name} with:")
             for key, value in arguments.items():
-                st.sidebar.write(f"{key}: {value}")
+                print(f"{key}: {value}")
 
 
             if function_name in available_functions:
                 function_to_call = available_functions[function_name]
                 output = function_to_call(**arguments)
+                print("Output Status", output)
                 tool_outputs.append({
-                    "id":action['id'], 
+                    "tool_call_id":action['id'], 
                     "output":output
                 })    
             else:
-                #st.sidebar.write(f"Unknown function: {function_name}")
+                print(f"Unknown function: {function_name}")
                 st.stop()
                 raise ValueError(f"Unknown function: {function_name}")
             
 
         print("Submitting outputs back to the Assistant...")
-        #st.sidebar.write("Submitting outputs back to the Assistant...")
+        
         self.client.beta.threads.runs.submit_tool_outputs(
             thread_id=self.thread.id,
             run_id=self.run.id,
