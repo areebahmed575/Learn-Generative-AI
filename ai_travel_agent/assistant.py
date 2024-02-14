@@ -93,7 +93,8 @@ class Trip:
                 run_id=self.run.id
             )
             
-            time.sleep(3)
+            time.sleep(3)# Wait for 3 seconds before checking again
+
             print(f"Status: {run_status.status}")
 
             if run_status.status == 'completed':
@@ -101,6 +102,7 @@ class Trip:
                 return processed_response
             elif run_status.status == 'requires_action' and run_status.required_action is not None:
                 print("Function Calling ...")
+                print(f"Status: {run_status.required_action.submit_tool_outputs.model_dump()}")
                 self.call_required_functions(
                     run_status.required_action.submit_tool_outputs.model_dump())
             elif run.status == "failed":
@@ -118,7 +120,8 @@ class Trip:
     
     def call_required_functions(self, action_required):
         tool_outputs = []
-        print("Calling tool call required functions...",action_required["tool_calls"])
+        print("Checking agian")
+        print(f"Calling tool call required functions...{action_required["tool_calls"]}")
         
         
         for action in action_required["tool_calls"]:  
@@ -157,8 +160,6 @@ class Trip:
              
 
 
-
-            
 
 
 

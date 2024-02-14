@@ -65,7 +65,7 @@ tools = [
 ]
 
 
-# We will update map state in session state
+
 def update_map(longitude: float, latitude: float, zoom: int):
   
     st.session_state["map"] = {

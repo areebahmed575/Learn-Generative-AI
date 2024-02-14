@@ -11,8 +11,8 @@ MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_TOKEN")
 
 
 st.set_page_config(
-    page_title="AI Travel Assistant",
     page_icon="✈️",
+    page_title="AI Travel Assistant",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -63,8 +63,7 @@ def on_text_input():
         content=st.session_state.input_user_msg,
         role = "user"
     )
-    with st.spinner('Fetching your traveling insights...'):  # Displaying the spinner
-        # Simulate some processing time (you can replace this with your actual processing logic)
+    with st.spinner('Fetching your traveling insights...'):  
         sleep(2)
 
         run = ai_travel.create_run(
