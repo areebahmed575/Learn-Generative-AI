@@ -73,68 +73,81 @@ from enum import Enum
 
 class Course(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
+    program_id : int
+    instructot_id : int
     course_name: str
-    course_description: str
+   
+
+
+# class Students(SQLModel):
+#     id: int | None = Field(default=None, primary_key=True)
+#     student_name: str
+#     student_email: str
+#     student_password: str
+#     course_id: int | None = Field(default=None, foreign_key="course.id")
+
 
 
 class Topic(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     course_id: int | None = Field(default=None, foreign_key="course.id")
     topic_name: str
-    description: str
+    topic_description: str
 
+class Content(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    topic_id : int = Field(default=None, foreign_key="topic.id")
 
 class Quiz(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     course_id: int | None = Field(default=None, foreign_key="course.id")
     quiz_name: str
     quiz_time: str
+    quiz_description : str
 
 
 class QuizTopics(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     quiz_id: int | None = Field(default=None, foreign_key="quiz.id")
     topic_id: int | None = Field(default=None, foreign_key="topic.id")
+    #parent_quiz_topic_id : Field(default=None, foreign_key="topic.id")
+    quiz_name : str|None = None
 
 
 class QuestionType(str, Enum):
     single_select = "single_select"
     multi_select = "multi_select"
+    case_study = "case_study"
     free_text = "free_text"
     code_questions = "code_questions"
+    
 
 
 class Question(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     quiz_id: int | None = Field(default=None, foreign_key="quiz.id")
-    topic_id: int | None = Field(default=None, foreign_key="topic.id")
     question_text: str
     question_type: QuestionType
     question_points: int
 
 
-class MultiSelect(SQLModel):
+class SingleSelectMcqs(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    question_id: int | None = Field(default=None, foreign_key="question.id")
+    #mcqs_type :Enum
+
+
+class MultiSelectMcqs(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     question_id: int | None = Field(default=None, foreign_key="question.id")
     mcqs_id: int
-    option_text: str
-    is_correct: bool
-
-
-class SingleSelect(SQLModel):
-    id: int | None = Field(default=None, primary_key=True)
-    question_id: int | None = Field(default=None, foreign_key="question.id")
-    mcqs_id: int
-    option_text: str
-    is_correct: bool
+    
 
 
 class CaseStudy(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     question_id: int | None = Field(default=None, foreign_key="question.id")
-    option_text: str
-    is_correct: bool
-
+    mcqs_id : int
 
 class CodingQuestions(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
@@ -151,8 +164,49 @@ class AnswerSheet(SQLModel):
 
 
 class Answer(SQLModel):
-    id: int | None = Field(default=None, primary_key=True)  
+    id: int | None = Field(default=None, primary_key=True) 
+    correct_answer : str
+    points_received : int 
 
+
+
+class SingleSelectMcqsAns(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    answer_id: int | None = Field(default=None, foreign_key="answer.id")
+    mcqs_id: int
+    selected_mcqs_id: int
+
+
+class MultiSelectMcqsAns(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    answer_id: int | None = Field(default=None, foreign_key="answer.id")
+    mcqs_id: int
+    
+
+class OptionMultiSelectAnswer(SQLModel):
+    id: int | None = Field(default=None, primary_key=True)
+    multislelect_mcqs_id: int | None = Field(default=None, foreign_key="multiselect_mcqs.id")
+    selected_mcqs_id: int
+
+class CaseStudyAns(SQLModel):
+    id : int | None = Field(default=None, primary_key=True)
+    answer_id : int | None = Field(default=None, foreign_key="answer.id")
+
+class JoinCaseStudyAnswer(SQLModel):
+    id : int | None = Field(default=None, primary_key=True)
+    case_study_id : int | None = Field(default=None, foreign_key="case_study.id")
+    single_select_mcq_answer_id : int
+
+class FreeTextAnswer(SQLModel):
+    id : int | None = Field(default=None, primary_key=True)
+    answer_id : int | None = Field(default=None, foreign_key="answer.id")
+    field_answer : str
+
+class CodingQuestionsAnswer(SQLModel):
+    id : int | None = Field(default=None, primary_key=True)
+    answer_id : int | None = Field(default=None, foreign_key="answer.id")
+    field_answer : str
+    
 
 app = FastAPI()
 
