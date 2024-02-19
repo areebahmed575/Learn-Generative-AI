@@ -1,7 +1,8 @@
 from fastapi import FastAPI,Depends,HTTPException,Query
-from sqlmodel import Field, SQLModel, create_engine,Session,select
+from sqlmodel import Field, SQLModel, create_engine,Session,select,Relationship
 from typing import Annotated
 from enum import Enum
+from datetime import datetime
 
 # class Admin(table=True):
 #    id:int|None = Field(default=None,primary_key=True)
@@ -71,11 +72,6 @@ from enum import Enum
 #    users:list[UserResponse] = []
 #    users:list[UserCreate] = []
 
-class Course(SQLModel):
-    id: int | None = Field(default=None, primary_key=True)
-    program_id : int
-    instructot_id : int
-    course_name: str
    
 
 
@@ -87,32 +83,48 @@ class Course(SQLModel):
 #     course_id: int | None = Field(default=None, foreign_key="course.id")
 
 
+class Course(SQLModel,table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    program_id : int
+    instructor_id : int
+    course_name: str
+    topics : list["Topic"] = Relationship(back_populates="course")  # one to many
+    quizes : list["Quiz"] = Relationship(back_populates="course")  # one to many or #one to one
 
-class Topic(SQLModel):
+
+class Topic(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     course_id: int | None = Field(default=None, foreign_key="course.id")
     topic_name: str
     topic_description: str
+    course: Course = Relationship(back_populates="topics") # many to one
+    contents: list["Content"] = Relationship(back_populates="topic") # one to many
+    quiz_topics: list["QuizTopics"] = Relationship(back_populates="topic") # one to many
 
-class Content(SQLModel):
+class Content(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     topic_id : int = Field(default=None, foreign_key="topic.id")
+    topic: Topic = Relationship(back_populates="contents") # many to one
 
-class Quiz(SQLModel):
+class Quiz(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     course_id: int | None = Field(default=None, foreign_key="course.id")
     quiz_name: str
-    quiz_time: str
+    quiz_time: datetime
     quiz_description : str
+    course: Course = Relationship(back_populates="quizes") # many to one
+    answer_sheets: list["AnswerSheet"] = Relationship(back_populates="quiz") # one to many
+    quiz_topics: list["QuizTopics"] = Relationship(back_populates="quiz") # one to many
 
 
-class QuizTopics(SQLModel):
+class QuizTopics(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     quiz_id: int | None = Field(default=None, foreign_key="quiz.id")
     topic_id: int | None = Field(default=None, foreign_key="topic.id")
-    #parent_quiz_topic_id : Field(default=None, foreign_key="topic.id")
+    parent_quiz_topic_id: int | None = Field(default=None, foreign_key="quiz_topics.id")
     quiz_name : str|None = None
-
+    quiz: Quiz = Relationship(back_populates="quiz_topics") # many to one
+    topic: Topic = Relationship(back_populates="quiz_topics") # many to one
 
 class QuestionType(str, Enum):
     single_select = "single_select"
@@ -123,89 +135,131 @@ class QuestionType(str, Enum):
     
 
 
-class Question(SQLModel):
+class Question(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     quiz_id: int | None = Field(default=None, foreign_key="quiz.id")
     question_text: str
     question_type: QuestionType
     question_points: int
+    single_select_mcqs: "SingleSelectMcqs" = Relationship(back_populates="question", uselist=False)
+    multi_select_mcqs: "MultiSelectMcqs" = Relationship(back_populates="question", uselist=False)
+    coding_questions: "CodingQuestions" = Relationship(back_populates="question", uselist=False)
+    
+    
+    
 
 
-class SingleSelectMcqs(SQLModel):
+class SingleSelectMcqs(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     question_id: int | None = Field(default=None, foreign_key="question.id")
     #mcqs_type :Enum
+    question: Question = Relationship(back_populates="single_select_mcqs") # one to one
+    options: list["SingleOptions"] = Relationship(back_populates="single_select_mcqs") # one to many
 
 
-class MultiSelectMcqs(SQLModel):
+class SingleOptions(SQLModel,table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    single_select_id : int | None = Field(default=None, foreign_key="singleselectmcqs.id")
+    option_text : str
+    is_correct : bool
+    single_select_mcqs: SingleSelectMcqs = Relationship(back_populates="options") # many to one
+    
+
+class MultiSelectMcqs(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     question_id: int | None = Field(default=None, foreign_key="question.id")
     mcqs_id: int
+    question: Question = Relationship(back_populates="multi_select_mcqs") # one to one
+    options: list["OptionMultiSelectQuestions"] = Relationship(back_populates="multi_select_mcqs") # one to many
+
+
     
+class OptionMultiSelectQuestions(SQLModel,table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    multi_select_id : int | None = Field(default=None, foreign_key="multiselectmcqs.id")
+    option_text : str
+    is_correct : bool
+    multi_select_mcqs: MultiSelectMcqs = Relationship(back_populates="options") # many to one
 
 
-class CaseStudy(SQLModel):
+
+class CaseStudy(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     question_id: int | None = Field(default=None, foreign_key="question.id")
     mcqs_id : int
+    question: Question = Relationship(back_populates="case_study") # one to one
 
-class CodingQuestions(SQLModel):
+class CodingQuestions(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     question_id: int | None = Field(default=None, foreign_key="question.id")
     is_correct: bool
+    question: Question = Relationship(back_populates="coding_questions") # one to one
 
 
-class AnswerSheet(SQLModel):
+class AnswerSheet(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     quiz_id: int | None = Field(default=None, foreign_key="quiz.id")
     quiz_status: str
-    start_date: str  # Consider using datetime instead
-    end_date: str  # Consider using datetime instead
+    start_date: datetime  
+    end_date: datetime   
+    answers: list["Answer"] = Relationship(back_populates="answer_sheet") # one to many
 
-
-class Answer(SQLModel):
+class Answer(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True) 
     correct_answer : str
     points_received : int 
+    single_select_mcqs_ans: list["SingleSelectMcqsAns"] = Relationship(back_populates="answer") # one to many
+    multi_select_mcqs_ans: list["MultiSelectMcqsAns"] = Relationship(back_populates="answer") # one to many
+    case_study_ans: list["CaseStudyAns"] = Relationship(back_populates="answer") # one to many
+    coding_questions_answer: list["CodingQuestionsAnswer"] = Relationship(back_populates="answer") # one to many
 
 
 
-class SingleSelectMcqsAns(SQLModel):
+class SingleSelectMcqsAns(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     answer_id: int | None = Field(default=None, foreign_key="answer.id")
     mcqs_id: int
     selected_mcqs_id: int
+    answer: Answer = Relationship(back_populates="single_select_mcqs_ans") # many to one
 
 
-class MultiSelectMcqsAns(SQLModel):
+class MultiSelectMcqsAns(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     answer_id: int | None = Field(default=None, foreign_key="answer.id")
     mcqs_id: int
-    
+    answer: Answer = Relationship(back_populates="multi_select_mcqs_ans") # many to one
+    options: list["OptionMultiSelectAnswer"] = Relationship(back_populates="multi_select_mcqs_ans") # one to many
 
-class OptionMultiSelectAnswer(SQLModel):
+class OptionMultiSelectAnswer(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     multislelect_mcqs_id: int | None = Field(default=None, foreign_key="multiselect_mcqs.id")
     selected_mcqs_id: int
+    multi_select_mcqs_ans: MultiSelectMcqsAns = Relationship(back_populates="options") # many to one
 
-class CaseStudyAns(SQLModel):
+class CaseStudyAns(SQLModel,table=True):
     id : int | None = Field(default=None, primary_key=True)
     answer_id : int | None = Field(default=None, foreign_key="answer.id")
+    answer: Answer = Relationship(back_populates="case_study_ans") # many to one
+    join_case_study_answer: list["JoinCaseStudyAnswer"] = Relationship(back_populates="case_study_ans") # one to many
 
-class JoinCaseStudyAnswer(SQLModel):
+
+class JoinCaseStudyAnswer(SQLModel,table=True):
     id : int | None = Field(default=None, primary_key=True)
     case_study_id : int | None = Field(default=None, foreign_key="case_study.id")
     single_select_mcq_answer_id : int
+    case_study_ans: CaseStudyAns = Relationship(back_populates="join_case_study_answer") # many to one
 
-class FreeTextAnswer(SQLModel):
+# class FreeTextAnswer(SQLModel):
+#     id : int | None = Field(default=None, primary_key=True)
+#     answer_id : int | None = Field(default=None, foreign_key="answer.id")
+#     field_answer : str
+
+class CodingQuestionsAnswer(SQLModel,table=True):
     id : int | None = Field(default=None, primary_key=True)
     answer_id : int | None = Field(default=None, foreign_key="answer.id")
     field_answer : str
-
-class CodingQuestionsAnswer(SQLModel):
-    id : int | None = Field(default=None, primary_key=True)
-    answer_id : int | None = Field(default=None, foreign_key="answer.id")
-    field_answer : str
+    answer: Answer = Relationship(back_populates="coding_questions_answer") # many to one
+   
     
 
 app = FastAPI()
