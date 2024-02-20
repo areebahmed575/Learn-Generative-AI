@@ -3,6 +3,7 @@ from sqlmodel import Field, SQLModel, create_engine,Session,select,Relationship
 from typing import Annotated
 from enum import Enum
 from datetime import datetime
+from fastapi import Depends
 
 # class Admin(table=True):
 #    id:int|None = Field(default=None,primary_key=True)
@@ -121,7 +122,7 @@ class QuizTopics(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     quiz_id: int | None = Field(default=None, foreign_key="quiz.id")
     topic_id: int | None = Field(default=None, foreign_key="topic.id")
-    parent_quiz_topic_id: int | None = Field(default=None, foreign_key="quiz_topics.id")
+    parent_quiz_topic_id: int | None = Field(default=None, foreign_key="quiztopics.id")
     quiz_name : str|None = None
     quiz: Quiz = Relationship(back_populates="quiz_topics") # many to one
     topic: Topic = Relationship(back_populates="quiz_topics") # many to one
@@ -141,18 +142,22 @@ class Question(SQLModel,table=True):
     question_text: str
     question_type: QuestionType
     question_points: int
-    single_select_mcqs: "SingleSelectMcqs" = Relationship(back_populates="question", uselist=False)
-    multi_select_mcqs: "MultiSelectMcqs" = Relationship(back_populates="question", uselist=False)
-    coding_questions: "CodingQuestions" = Relationship(back_populates="question", uselist=False)
+    single_select_mcqs: "SingleSelectMcqs" = Relationship(back_populates="question")
+    multi_select_mcqs: "MultiSelectMcqs" = Relationship(back_populates="question")
+    coding_questions: "CodingQuestions" = Relationship(back_populates="question")
     
     
-    
+class McqsType(str,Enum):
+    type1: str = "Type 1"
+    type2: str = "Type 2"
+    type3: str = "Type 3"
+    type4: str = "Type 4"    
 
 
 class SingleSelectMcqs(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     question_id: int | None = Field(default=None, foreign_key="question.id")
-    #mcqs_type :Enum
+    mcqs_type: McqsType
     question: Question = Relationship(back_populates="single_select_mcqs") # one to one
     options: list["SingleOptions"] = Relationship(back_populates="single_select_mcqs") # one to many
 
@@ -232,7 +237,7 @@ class MultiSelectMcqsAns(SQLModel,table=True):
 
 class OptionMultiSelectAnswer(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
-    multislelect_mcqs_id: int | None = Field(default=None, foreign_key="multiselect_mcqs.id")
+    multislelect_mcqs_id: int | None = Field(default=None, foreign_key="multiselectmcqs.id")
     selected_mcqs_id: int
     multi_select_mcqs_ans: MultiSelectMcqsAns = Relationship(back_populates="options") # many to one
 
@@ -245,7 +250,7 @@ class CaseStudyAns(SQLModel,table=True):
 
 class JoinCaseStudyAnswer(SQLModel,table=True):
     id : int | None = Field(default=None, primary_key=True)
-    case_study_id : int | None = Field(default=None, foreign_key="case_study.id")
+    case_study_id : int | None = Field(default=None, foreign_key="casestudy.id")
     single_select_mcq_answer_id : int
     case_study_ans: CaseStudyAns = Relationship(back_populates="join_case_study_answer") # many to one
 
@@ -262,7 +267,7 @@ class CodingQuestionsAnswer(SQLModel,table=True):
    
     
 
-app = FastAPI()
+
 
 
 
@@ -291,3 +296,32 @@ def on_startup():
 @app.get("/")
 async def root():
     return {"message":"Hello World"}
+
+
+@app.get("/courses",response_model = list[Course])
+def get_courses(session: Annotated[Session, Depends(get_db)]):
+    courses = session.exec(select(Course)).all()
+    return courses
+
+
+@app.get("/courses/{courses_id}", response_model= Course)
+def get_hero(courses_id:int, session:Annotated[Session, Depends(get_db)]):
+     course = session.get(Course, courses_id)
+     if not course:
+          raise HTTPException(status_code=404, detail="Course not found")
+     print(course.course_name)
+     return course
+
+
+    
+@app.get("/topics")
+def get_topics(session: Annotated[Session, Depends(get_db)]):
+    topics = session.exec(select(Topic)).all()
+    return topics
+
+
+
+
+
+
+
