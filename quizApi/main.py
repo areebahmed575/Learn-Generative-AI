@@ -27,7 +27,7 @@ class Topic(SQLModel,table=True):
 
 class Content(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
-    topic_id : int = Field(default=None, foreign_key="topic.id")
+    topic_id : int = Field(foreign_key="topic.id")
     topic: Topic = Relationship(back_populates="contents") # many to one
 
 class Quiz(SQLModel,table=True):
@@ -229,6 +229,7 @@ async def root():
     return {"message":"Hello World"}
 
 
+
 @app.get("/courses" , response_model = list[Course])
 def get_courses(session: Annotated[Session, Depends(get_db)]):
     courses = session.exec(select(Course)).all()
@@ -261,10 +262,12 @@ def get_topics(session: Session = Depends(get_db)):
 
 @app.post("/topics", response_model=Topic)
 def create_topic(topic: Topic, session: Session = Depends(get_db)):
-    session.add(topic)
+    print("Data from client:",topic)
+    topic_insert = Topic.model_validate(topic)
+    session.add(topic_insert)
     session.commit()
-    session.refresh(topic)
-    return topic
+    session.refresh(topic_insert)
+    return topic_insert
 
 @app.get("/topics/{topic_id}", response_model=Topic)
 def get_topic(topic_id: int, session: Session = Depends(get_db)):
@@ -274,6 +277,127 @@ def get_topic(topic_id: int, session: Session = Depends(get_db)):
     return topic
     
 
+@app.get("/contents", response_model=list[Content])
+def get_contents(session: Session = Depends(get_db)):
+    contents = session.exec(select(Content)).all()
+    return contents
+
+# @app.post("/contents", response_model=Content)
+# def create_content(content: Content, session: Session = Depends(get_db)):
+#     print("Data from client:",content)
+#     content_insert = Content.model_validate(content)
+#     session.add(content_insert)
+#     session.commit()
+#     session.refresh(content_insert)
+#     return content_insert
+
+@app.post("/contents", response_model=Content)
+def create_content(content: Content, session: Session = Depends(get_db)):
+    # Ensure that the provided topic_id exists
+    topic = session.get(Topic, content.topic_id)
+    if topic is None:
+        raise HTTPException(status_code=400, detail="Invalid topic_id provided")
+
+    # Create the Content instance
+    content_insert = Content(model_dump=content.model_dump())
+
+    session.add(content_insert)
+    session.commit()
+    session.refresh(content_insert)
+    return content_insert
+
+@app.get("/contents/{content_id}", response_model=Content)
+def get_content(content_id: int, session: Session = Depends(get_db)):
+    content = session.get(Content, content_id)
+    if not content:
+        raise HTTPException(status_code=404, detail="Content not found")
+    return content
+
+@app.get("/quizzes", response_model=list[Quiz])
+def get_quizzes(session: Session = Depends(get_db)):
+    quizzes = session.exec(select(Quiz)).all()
+    return quizzes
+
+@app.post("/quizzes", response_model=Quiz)
+def create_quiz(quiz: Quiz, session: Session = Depends(get_db)):
+    if quiz.course_id is None or quiz.course_id <= 0:
+        raise HTTPException(status_code=400, detail="Invalid course_id provided") 
+    print("Data from client:",quiz)
+    quiz_insert = Quiz.model_validate(quiz)
+    session.add(quiz_insert)
+    session.commit()
+    session.refresh(quiz_insert)
+    return quiz_insert
+
+@app.get("/quizzes/{quiz_id}", response_model=Quiz)
+def get_quiz(quiz_id: int, session: Session = Depends(get_db)):
+    quiz = session.get(Quiz, quiz_id)
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    return quiz
+
+@app.get("/questions", response_model=list[Question])
+def get_questions(session: Session = Depends(get_db)):
+    questions = session.exec(select(Question)).all()
+    return questions
+
+@app.post("/questions", response_model=Question)
+def create_question(question: Question, session: Session = Depends(get_db)):
+    print("Data from client:",question)
+    question_insert = Question.model_validate(question)
+    session.add(question_insert)
+    session.commit()
+    session.refresh(question_insert)
+    return question_insert
+
+@app.get("/questions/{question_id}", response_model=Question)
+def get_question(question_id: int, session: Session = Depends(get_db)):
+    question = session.get(Question, question_id)
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    return question
+
+@app.get("/answersheets", response_model=list[AnswerSheet])
+def get_answer_sheets(session: Session = Depends(get_db)):
+    answer_sheets = session.exec(select(AnswerSheet)).all()
+    return answer_sheets
+
+@app.post("/answersheets", response_model=AnswerSheet)
+def create_answer_sheet(answer_sheet: AnswerSheet, session: Session = Depends(get_db)):
+    print("Data from client:",answer_sheet)
+    answer_sheet_insert = AnswerSheet.model_validate(answer_sheet)
+    session.add(answer_sheet_insert)
+    session.commit()
+    session.refresh(answer_sheet_insert)
+    return answer_sheet_insert
+
+@app.get("/answersheets/{answer_sheet_id}", response_model=AnswerSheet)
+def get_answer_sheet(answer_sheet_id: int, session: Session = Depends(get_db)):
+    answer_sheet = session.get(AnswerSheet, answer_sheet_id)
+    if not answer_sheet:
+        raise HTTPException(status_code=404, detail="Answer Sheet not found")
+    return answer_sheet
+
+@app.get("/answers", response_model=list[Answer])
+def get_answers(session: Session = Depends(get_db)):
+    answers = session.exec(select(Answer)).all()
+    return answers
+
+@app.post("/answers", response_model=Answer)
+def create_answer(answer: Answer, session: Session = Depends(get_db)):
+    print("Data from client:",answer)
+    answer_insert = Answer.model_validate(answer)
+    session.add(answer_insert)
+    session.commit()
+    session.refresh(answer_insert)
+    return answer_insert
+
+@app.get("/answers/{answer_id}", response_model=Answer)
+def get_answer(answer_id: int, session: Session = Depends(get_db)):
+    answer = session.get(Answer, answer_id)
+    if not answer:
+        raise HTTPException(status_code=404, detail="Answer not found")
+    return answer
 
 
 
