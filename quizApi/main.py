@@ -5,83 +5,6 @@ from enum import Enum
 from datetime import datetime
 from fastapi import Depends
 
-# class Admin(table=True):
-#    id:int|None = Field(default=None,primary_key=True)
-#    username : str
-#    email : str
-#    password : str
-
-# class User(table=True):
-#    id:int|None = Field(default=None, primary_key=True)
-#    username : str
-#    email : str
-#    password : str
-
-
-# class UserCreate(SQLModel):
-#    username : str
-#    email : str
-#    password : str
-   
-# class UserRead(SQLModel):
-#    username : str
-#    email : str
-#    password : str
-#    id:int|None = Field(default=None, primary_key=True)
-
-# class UserUpdate(SQLModel):
-#    username : str|None=None
-#    email : str|None=None
-#    password : str|None=None
-#    id:int|None = Field(default=None, primary_key=True)
-
-# class UserResponse(SQLModel):
-#    username : str
-#    email : str
-#    password : str
-#    id:int|None = Field(default=None, primary_key=True)
-
-# class UserResponseWithAdmin(UserResponse):
-#    admin:Admin = Relationship(back_populates="users")
-
-# class AdminCreate(SQLModel):
-#    username : str
-#    email : str
-#    password : str
-#    users:list[UserCreate] = []
-
-# class AdminRead(SQLModel):
-#    username : str
-#    email : str
-#    password : str
-#    id:int|None = Field(default=None, primary_key=True)
-#    users:list[UserRead] = []
-
-# class AdminUpdate(SQLModel):
-#    username : str|None=None
-#    email : str|None=None
-#    password : str|None=None
-#    id:int|None = Field(default=None, primary_key=True)
-#    users:list[UserUpdate] = []
-#    users:list[UserCreate] = []
-
-# class AdminResponse(SQLModel):
-#    username : str
-#    email : str
-#    password : str
-#    id:int|None = Field(default=None, primary_key=True)
-#    users:list[UserResponse] = []
-#    users:list[UserCreate] = []
-
-   
-
-
-# class Students(SQLModel):
-#     id: int | None = Field(default=None, primary_key=True)
-#     student_name: str
-#     student_email: str
-#     student_password: str
-#     course_id: int | None = Field(default=None, foreign_key="course.id")
 
 
 class Course(SQLModel,table=True):
@@ -136,7 +59,8 @@ class QuestionType(str, Enum):
     
 
 
-class Question(SQLModel,table=True):
+
+class Question(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     quiz_id: int | None = Field(default=None, foreign_key="quiz.id")
     question_text: str
@@ -160,6 +84,8 @@ class SingleSelectMcqs(SQLModel,table=True):
     mcqs_type: McqsType
     question: Question = Relationship(back_populates="single_select_mcqs") # one to one
     options: list["SingleOptions"] = Relationship(back_populates="single_select_mcqs") # one to many
+    case_study_id: int | None = Field(default=None, foreign_key="casestudy.id")
+    case_studies: list["CaseStudy"] = Relationship(back_populates="single_select_mcqs")  
 
 
 class SingleOptions(SQLModel,table=True):
@@ -192,13 +118,16 @@ class CaseStudy(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     question_id: int | None = Field(default=None, foreign_key="question.id")
     mcqs_id : int
-    question: Question = Relationship(back_populates="case_study") # one to one
+    single_select_mcqs_id: int  # Foreign key linking to SingleSelectMcqs
+    single_select_mcqs: SingleSelectMcqs = Relationship(back_populates="case_studies") 
 
 class CodingQuestions(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
     question_id: int | None = Field(default=None, foreign_key="question.id")
     is_correct: bool
     question: Question = Relationship(back_populates="coding_questions") # one to one
+
+
 
 
 class AnswerSheet(SQLModel,table=True):
@@ -208,16 +137,18 @@ class AnswerSheet(SQLModel,table=True):
     start_date: datetime  
     end_date: datetime   
     answers: list["Answer"] = Relationship(back_populates="answer_sheet") # one to many
+    quiz: Quiz = Relationship(back_populates="answer_sheets")  # Define the relationship with Quiz
 
-class Answer(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True) 
-    correct_answer : str
-    points_received : int 
-    single_select_mcqs_ans: list["SingleSelectMcqsAns"] = Relationship(back_populates="answer") # one to many
-    multi_select_mcqs_ans: list["MultiSelectMcqsAns"] = Relationship(back_populates="answer") # one to many
-    case_study_ans: list["CaseStudyAns"] = Relationship(back_populates="answer") # one to many
-    coding_questions_answer: list["CodingQuestionsAnswer"] = Relationship(back_populates="answer") # one to many
-
+class Answer(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    correct_answer: str
+    points_received: int
+    answer_sheet_id: int | None = Field(default=None, foreign_key="answersheet.id")
+    answer_sheet: AnswerSheet = Relationship(back_populates="answers")  # many to one
+    single_select_mcqs_ans: list["SingleSelectMcqsAns"] = Relationship(back_populates="answer")  # one to many
+    multi_select_mcqs_ans: list["MultiSelectMcqsAns"] = Relationship(back_populates="answer")  # one to many
+    case_study_ans: list["CaseStudyAns"] = Relationship(back_populates="answer")  # one to many
+    coding_questions_answer: list["CodingQuestionsAnswer"] = Relationship(back_populates="answer")  # one to many
 
 
 class SingleSelectMcqsAns(SQLModel,table=True):
@@ -235,9 +166,9 @@ class MultiSelectMcqsAns(SQLModel,table=True):
     answer: Answer = Relationship(back_populates="multi_select_mcqs_ans") # many to one
     options: list["OptionMultiSelectAnswer"] = Relationship(back_populates="multi_select_mcqs_ans") # one to many
 
-class OptionMultiSelectAnswer(SQLModel,table=True):
+class OptionMultiSelectAnswer(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    multislelect_mcqs_id: int | None = Field(default=None, foreign_key="multiselectmcqs.id")
+    multiselect_mcqs_ans_id: int | None = Field(default=None, foreign_key="multiselectmcqsans.id")
     selected_mcqs_id: int
     multi_select_mcqs_ans: MultiSelectMcqsAns = Relationship(back_populates="options") # many to one
 
@@ -248,11 +179,11 @@ class CaseStudyAns(SQLModel,table=True):
     join_case_study_answer: list["JoinCaseStudyAnswer"] = Relationship(back_populates="case_study_ans") # one to many
 
 
-class JoinCaseStudyAnswer(SQLModel,table=True):
-    id : int | None = Field(default=None, primary_key=True)
-    case_study_id : int | None = Field(default=None, foreign_key="casestudy.id")
-    single_select_mcq_answer_id : int
-    case_study_ans: CaseStudyAns = Relationship(back_populates="join_case_study_answer") # many to one
+class JoinCaseStudyAnswer(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    case_study_ans_id: int | None = Field(default=None, foreign_key="casestudyans.id")
+    single_select_mcq_answer_id: int
+    case_study_ans: CaseStudyAns = Relationship(back_populates="join_case_study_answer")
 
 # class FreeTextAnswer(SQLModel):
 #     id : int | None = Field(default=None, primary_key=True)
@@ -298,10 +229,21 @@ async def root():
     return {"message":"Hello World"}
 
 
-@app.get("/courses",response_model = list[Course])
+@app.get("/courses" , response_model = list[Course])
 def get_courses(session: Annotated[Session, Depends(get_db)]):
     courses = session.exec(select(Course)).all()
     return courses
+
+
+@app.post("/courses", response_model=Course)
+def create_course(course: Course, session: Annotated[Session, Depends(get_db)]):
+    print("Data from client:",course)
+    course_insert = Course.model_validate(course)
+    print("Data after validation:", course_insert)
+    session.add(course_insert)
+    session.commit()
+    return course_insert
+
 
 
 @app.get("/courses/{courses_id}", response_model= Course)
@@ -312,12 +254,25 @@ def get_hero(courses_id:int, session:Annotated[Session, Depends(get_db)]):
      print(course.course_name)
      return course
 
-
-    
-@app.get("/topics")
-def get_topics(session: Annotated[Session, Depends(get_db)]):
+@app.get("/topics", response_model=list[Topic])
+def get_topics(session: Session = Depends(get_db)):
     topics = session.exec(select(Topic)).all()
     return topics
+
+@app.post("/topics", response_model=Topic)
+def create_topic(topic: Topic, session: Session = Depends(get_db)):
+    session.add(topic)
+    session.commit()
+    session.refresh(topic)
+    return topic
+
+@app.get("/topics/{topic_id}", response_model=Topic)
+def get_topic(topic_id: int, session: Session = Depends(get_db)):
+    topic = session.get(Topic, topic_id)
+    if not topic:
+        raise HTTPException(status_code=404, detail="Topic not found")
+    return topic
+    
 
 
 
