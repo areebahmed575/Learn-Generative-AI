@@ -1,6 +1,6 @@
 from fastapi import FastAPI,Depends,HTTPException,Query
 from sqlmodel import Field, SQLModel, create_engine,Session,select,Relationship
-from typing import Annotated
+from typing import Annotated,Optional
 from enum import Enum
 from datetime import datetime
 from fastapi import Depends
@@ -27,7 +27,7 @@ class Topic(SQLModel,table=True):
 
 class Content(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
-    topic_id : int = Field(foreign_key="topic.id")
+    topic_id : Optional[int] = Field(foreign_key="topic.id")
     topic: Topic = Relationship(back_populates="contents") # many to one
 
 class Quiz(SQLModel,table=True):
@@ -143,7 +143,7 @@ class Answer(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     correct_answer: str
     points_received: int
-    answer_sheet_id: int | None = Field(default=None, foreign_key="answersheet.id")
+    answer_sheet_id: Optional[int] = Field(default=None, foreign_key="answersheet.id")
     answer_sheet: AnswerSheet = Relationship(back_populates="answers")  # many to one
     single_select_mcqs_ans: list["SingleSelectMcqsAns"] = Relationship(back_populates="answer")  # one to many
     multi_select_mcqs_ans: list["MultiSelectMcqsAns"] = Relationship(back_populates="answer")  # one to many
@@ -207,6 +207,7 @@ engine = create_engine(POSTGRESS_DB)
 
 
 def create_table():
+    # SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
 
 
