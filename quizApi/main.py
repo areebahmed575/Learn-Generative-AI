@@ -283,14 +283,6 @@ def get_contents(session: Session = Depends(get_db)):
     contents = session.exec(select(Content)).all()
     return contents
 
-# @app.post("/contents", response_model=Content)
-# def create_content(content: Content, session: Session = Depends(get_db)):
-#     print("Data from client:",content)
-#     content_insert = Content.model_validate(content)
-#     session.add(content_insert)
-#     session.commit()
-#     session.refresh(content_insert)
-#     return content_insert
 
 @app.post("/contents", response_model=Content)
 def create_content(content: Content, session: Session = Depends(get_db)):
