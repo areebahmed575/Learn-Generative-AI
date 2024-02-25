@@ -394,7 +394,125 @@ def get_answer(answer_id: int, session: Session = Depends(get_db)):
     return answer
 
 
+@app.get("/singleselectmcqsans", response_model=list[SingleSelectMcqsAns])
+def get_single_select_mcqs_ans(session: Session = Depends(get_db)):
+    single_select_mcqs_ans = session.exec(select(SingleSelectMcqsAns)).all()
+    return single_select_mcqs_ans
 
 
+@app.post("/singleselectmcqsans", response_model=SingleSelectMcqsAns)
+def create_single_select_mcqs_ans(single_select_mcqs_ans: SingleSelectMcqsAns, session: Session = Depends(get_db)):
+    single_select_mcqs_ans_insert = SingleSelectMcqsAns.model_validate(single_select_mcqs_ans)
+    session.add(single_select_mcqs_ans_insert)
+    session.commit()
+    session.refresh(single_select_mcqs_ans_insert)
+    return single_select_mcqs_ans_insert
+
+@app.get("/singleselectmcqsans/{singleselectmcqsans_id}", response_model=SingleSelectMcqsAns)
+def get_single_select_mcqs_ans(singleselectmcqsans_id: int, session: Session = Depends(get_db)):
+    single_select_mcqs_ans = session.get(SingleSelectMcqsAns, singleselectmcqsans_id)
+    if not single_select_mcqs_ans:
+        raise HTTPException(status_code=404, detail="Single Select MCQs Answer not found")
+    return single_select_mcqs_ans
+
+@app.get("/multiselectmcqsans", response_model=list[MultiSelectMcqsAns])
+def get_multi_select_mcqs_ans(session: Session = Depends(get_db)):
+    multi_select_mcqs_ans = session.exec(select(MultiSelectMcqsAns)).all()
+    return multi_select_mcqs_ans
+
+@app.post("/multiselectmcqsans", response_model=MultiSelectMcqsAns)
+def create_multi_select_mcqs_ans(multi_select_mcqs_ans: MultiSelectMcqsAns, session: Session = Depends(get_db)):
+    multi_select_mcqs_ans_insert = MultiSelectMcqsAns.model_validate(multi_select_mcqs_ans)
+    session.add(multi_select_mcqs_ans_insert)
+    session.commit()
+    session.refresh(multi_select_mcqs_ans_insert)
+    return multi_select_mcqs_ans_insert
+
+@app.get("/multiselectmcqsans/{multiselectmcqsans_id}", response_model=MultiSelectMcqsAns)
+def get_multi_select_mcqs_ans(multiselectmcqsans_id: int, session: Session = Depends(get_db)):
+    multi_select_mcqs_ans = session.get(MultiSelectMcqsAns, multiselectmcqsans_id)
+    if not multi_select_mcqs_ans:
+        raise HTTPException(status_code=404, detail="Multi Select MCQs Answer not found")
+    return multi_select_mcqs_ans
 
 
+@app.get("/optionmultiselectanswers", response_model=list[OptionMultiSelectAnswer])
+def get_option_multi_select_answers(session: Session = Depends(get_db)):
+    option_multi_select_answers = session.exec(select(OptionMultiSelectAnswer)).all()
+    return option_multi_select_answers
+
+@app.post("/optionmultiselectanswers", response_model=OptionMultiSelectAnswer)
+def create_option_multi_select_answer(option_multi_select_answer: OptionMultiSelectAnswer, session: Session = Depends(get_db)):
+    option_multi_select_answer_insert = OptionMultiSelectAnswer.model_validate(option_multi_select_answer)
+    session.add(option_multi_select_answer_insert)
+    session.commit()
+    session.refresh(option_multi_select_answer_insert)
+    return option_multi_select_answer_insert
+
+@app.get("/optionmultiselectanswers/{optionmultiselectanswers_id}", response_model=OptionMultiSelectAnswer)
+def get_option_multi_select_answer(optionmultiselectanswers_id: int, session: Session = Depends(get_db)):
+    option_multi_select_answer = session.get(OptionMultiSelectAnswer, optionmultiselectanswers_id)
+    if not option_multi_select_answer:
+        raise HTTPException(status_code=404, detail="Option Multi Select Answer not found")
+    return option_multi_select_answer
+
+
+@app.get("/casestudyans", response_model=list[CaseStudyAns])
+def get_case_study_answers(session: Session = Depends(get_db)):
+    case_study_answers = session.exec(select(CaseStudyAns)).all()
+    return case_study_answers
+
+@app.post("/casestudyans", response_model=CaseStudyAns)
+def create_case_study_answer(case_study_answer: CaseStudyAns, session: Session = Depends(get_db)):
+    case_study_answer_insert = CaseStudyAns.model_validate(case_study_answer)
+    session.add(case_study_answer_insert)
+    session.commit()
+    session.refresh(case_study_answer_insert)
+    return case_study_answer_insert
+
+@app.get("/casestudyans/{casestudyans_id}", response_model=CaseStudyAns)
+def get_case_study_answer(casestudyans_id: int, session: Session = Depends(get_db)):
+    case_study_answer = session.get(CaseStudyAns, casestudyans_id)
+    if not case_study_answer:
+        raise HTTPException(status_code=404, detail="Case Study Answer not found")
+    return case_study_answer
+
+@app.get("/joincasestudyanswers", response_model=list[JoinCaseStudyAnswer])
+def get_join_case_study_answers(session: Session = Depends(get_db)):
+    join_case_study_answers = session.exec(select(JoinCaseStudyAnswer)).all()
+    return join_case_study_answers
+
+@app.post("/joincasestudyanswers", response_model=JoinCaseStudyAnswer)
+def create_join_case_study_answer(join_case_study_answer: JoinCaseStudyAnswer, session: Session = Depends(get_db)):
+    join_case_study_answer_insert = JoinCaseStudyAnswer.model_validate(join_case_study_answer)
+    session.add(join_case_study_answer_insert)
+    session.commit()
+    session.refresh(join_case_study_answer_insert)
+    return join_case_study_answer_insert
+
+@app.get("/joincasestudyanswers/{joincasestudyanswers_id}", response_model=JoinCaseStudyAnswer)
+def get_join_case_study_answer(joincasestudyanswers_id: int, session: Session = Depends(get_db)):
+    join_case_study_answer = session.get(JoinCaseStudyAnswer, joincasestudyanswers_id)
+    if not join_case_study_answer:
+        raise HTTPException(status_code=404, detail="Join Case Study Answer not found")
+    return join_case_study_answer
+
+@app.get("/codingquestionsanswers", response_model=list[CodingQuestionsAnswer])
+def get_coding_questions_answers(session: Session = Depends(get_db)):
+    coding_questions_answers = session.exec(select(CodingQuestionsAnswer)).all()
+    return coding_questions_answers
+
+@app.post("/codingquestionsanswers", response_model=CodingQuestionsAnswer)
+def create_coding_questions_answer(coding_questions_answer: CodingQuestionsAnswer, session: Session = Depends(get_db)):
+    coding_questions_answer_insert = CodingQuestionsAnswer.model_validate(coding_questions_answer)
+    session.add(coding_questions_answer_insert)
+    session.commit()
+    session.refresh(coding_questions_answer_insert)
+    return coding_questions_answer_insert
+
+@app.get("/codingquestionsanswers/{codingquestionsanswers_id}", response_model=CodingQuestionsAnswer)
+def get_coding_questions_answer(codingquestionsanswers_id: int, session: Session = Depends(get_db)):
+    coding_questions_answer = session.get(CodingQuestionsAnswer, codingquestionsanswers_id)
+    if not coding_questions_answer:
+        raise HTTPException(status_code=404, detail="Coding Questions Answer not found")
+    return coding_questions_answer
