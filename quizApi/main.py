@@ -185,10 +185,6 @@ class JoinCaseStudyAnswer(SQLModel, table=True):
     single_select_mcq_answer_id: int
     case_study_ans: CaseStudyAns = Relationship(back_populates="join_case_study_answer")
 
-# class FreeTextAnswer(SQLModel):
-#     id : int | None = Field(default=None, primary_key=True)
-#     answer_id : int | None = Field(default=None, foreign_key="answer.id")
-#     field_answer : str
 
 class CodingQuestionsAnswer(SQLModel,table=True):
     id : int | None = Field(default=None, primary_key=True)
@@ -294,7 +290,7 @@ def create_content(content: Content, session: Session = Depends(get_db)):
     if topic is None:
         raise HTTPException(status_code=400, detail="Invalid topic_id provided")
 
-    # Create the Content instance
+    
     content_insert = Content(**content.model_dump())
 
     session.add(content_insert)
