@@ -185,6 +185,10 @@ class JoinCaseStudyAnswer(SQLModel, table=True):
     single_select_mcq_answer_id: int
     case_study_ans: CaseStudyAns = Relationship(back_populates="join_case_study_answer")
 
+# class FreeTextAnswer(SQLModel):
+#     id : int | None = Field(default=None, primary_key=True)
+#     answer_id : int | None = Field(default=None, foreign_key="answer.id")
+#     field_answer : str
 
 class CodingQuestionsAnswer(SQLModel,table=True):
     id : int | None = Field(default=None, primary_key=True)
@@ -279,10 +283,18 @@ def get_contents(session: Session = Depends(get_db)):
     contents = session.exec(select(Content)).all()
     return contents
 
+# @app.post("/contents", response_model=Content)
+# def create_content(content: Content, session: Session = Depends(get_db)):
+#     print("Data from client:",content)
+#     content_insert = Content.model_validate(content)
+#     session.add(content_insert)
+#     session.commit()
+#     session.refresh(content_insert)
+#     return content_insert
 
 @app.post("/contents", response_model=Content)
 def create_content(content: Content, session: Session = Depends(get_db)):
-    
+    # Ensure that the provided topic_id exists
     if content.topic_id is None:
         raise HTTPException(status_code=400, detail="topic_id is required for Content creation")
 
@@ -290,7 +302,7 @@ def create_content(content: Content, session: Session = Depends(get_db)):
     if topic is None:
         raise HTTPException(status_code=400, detail="Invalid topic_id provided")
 
-    
+    # Create the Content instance
     content_insert = Content(**content.model_dump())
 
     session.add(content_insert)
