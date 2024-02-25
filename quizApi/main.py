@@ -272,7 +272,37 @@ def get_topic(topic_id: int, session: Session = Depends(get_db)):
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
     return topic
+
+@app.get("/quiztopics", response_model=list[QuizTopics])
+def get_quiz_topics(session: Session = Depends(get_db)):
+    quiz_topics = session.exec(select(QuizTopics)).all()
+    return quiz_topics
+
+@app.post("/quiztopics", response_model=QuizTopics)
+def create_quiz_topic(quiz_topic: QuizTopics, session: Session = Depends(get_db)):
+    # Assuming the attributes are named 'quiz_name' and 'quiz_description' in your model
+    topic_data = {
+    "topic_name": quiz_topic.quiz_name,  # Assuming quiz_name corresponds to topic_name
+    }
+    new_topic = QuizTopics(**topic_data)
+    # Validate the QuizTopics object
+    if new_topic is None:
+        raise HTTPException(status_code=400, detail="Invalid topic data")
+        
+    # Add the new_topic to the session and commit the transaction
+    session.add(new_topic)
+    session.commit()
+    session.refresh(new_topic)
     
+    return new_topic
+
+
+@app.get("/quiztopics/{quiz_topic_id}", response_model=QuizTopics)
+def get_quiz_topic(quiz_topic_id: int, session: Session = Depends(get_db)):
+    quiz_topic = session.get(QuizTopics, quiz_topic_id)
+    if not quiz_topic:
+        raise HTTPException(status_code=404, detail="Quiz Topic not found")
+    return quiz_topic    
 
 @app.get("/contents", response_model=list[Content])
 def get_contents(session: Session = Depends(get_db)):
@@ -350,6 +380,129 @@ def get_question(question_id: int, session: Session = Depends(get_db)):
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
     return question
+
+@app.get("/singleselectmcqs", response_model=list[SingleSelectMcqs])
+def get_single_select_mcqs(session: Session = Depends(get_db)):
+    single_select_mcqs = session.exec(select(SingleSelectMcqs)).all()
+    return single_select_mcqs
+
+@app.post("/singleselectmcqs", response_model=SingleSelectMcqs)
+def create_single_select_mcqs(single_select_mcqs: SingleSelectMcqs, session: Session = Depends(get_db)):
+    single_select_mcqs_insert = SingleSelectMcqs.model_validate(single_select_mcqs)
+    session.add(single_select_mcqs_insert)
+    session.commit()
+    session.refresh(single_select_mcqs_insert)
+    return single_select_mcqs_insert
+
+@app.get("/singleselectmcqs/{singleselectmcqs_id}", response_model=SingleSelectMcqs)
+def get_single_select_mcq(singleselectmcqs_id: int, session: Session = Depends(get_db)):
+    single_select_mcqs = session.get(SingleSelectMcqs, singleselectmcqs_id)
+    if not single_select_mcqs:
+        raise HTTPException(status_code=404, detail="Single Select MCQ not found")
+    return single_select_mcqs
+
+@app.get("/singleoptions", response_model=list[SingleOptions])
+def get_single_options(session: Session = Depends(get_db)):
+    single_options = session.exec(select(SingleOptions)).all()
+    return single_options
+
+@app.post("/singleoptions", response_model=SingleOptions)
+def create_single_option(single_option: SingleOptions, session: Session = Depends(get_db)):
+    single_option_insert = SingleOptions.model_validate(single_option)
+    session.add(single_option_insert)
+    session.commit()
+    session.refresh(single_option_insert)
+    return single_option_insert
+
+@app.get("/singleoptions/{singleoptions_id}", response_model=SingleOptions)
+def get_single_option(singleoptions_id: int, session: Session = Depends(get_db)):
+    single_option = session.get(SingleOptions, singleoptions_id)
+    if not single_option:
+        raise HTTPException(status_code=404, detail="Single Option not found")
+    return single_option
+
+@app.get("/multiselectmcqs", response_model=list[MultiSelectMcqs])
+def get_multi_select_mcqs(session: Session = Depends(get_db)):
+    multi_select_mcqs = session.exec(select(MultiSelectMcqs)).all()
+    return multi_select_mcqs
+
+@app.post("/multiselectmcqs", response_model=MultiSelectMcqs)
+def create_multi_select_mcqs(multi_select_mcqs: MultiSelectMcqs, session: Session = Depends(get_db)):
+    multi_select_mcqs_insert = MultiSelectMcqs.model_validate(multi_select_mcqs)
+    session.add(multi_select_mcqs_insert)
+    session.commit()
+    session.refresh(multi_select_mcqs_insert)
+    return multi_select_mcqs_insert
+
+@app.get("/multiselectmcqs/{multiselectmcqs_id}", response_model=MultiSelectMcqs)
+def get_multi_select_mcq(multiselectmcqs_id: int, session: Session = Depends(get_db)):
+    multi_select_mcqs = session.get(MultiSelectMcqs, multiselectmcqs_id)
+    if not multi_select_mcqs:
+        raise HTTPException(status_code=404, detail="Multi Select MCQ not found")
+    return multi_select_mcqs
+
+@app.get("/optionmultiselectquestions", response_model=list[OptionMultiSelectQuestions])
+def get_option_multi_select_questions(session: Session = Depends(get_db)):
+    option_multi_select_questions = session.exec(select(OptionMultiSelectQuestions)).all()
+    return option_multi_select_questions
+
+@app.post("/optionmultiselectquestions", response_model=OptionMultiSelectQuestions)
+def create_option_multi_select_question(option_multi_select_question: OptionMultiSelectQuestions, session: Session = Depends(get_db)):
+    option_multi_select_question_insert = OptionMultiSelectQuestions.model_validate(option_multi_select_question)
+    session.add(option_multi_select_question_insert)
+    session.commit()
+    session.refresh(option_multi_select_question_insert)
+    return option_multi_select_question_insert
+
+@app.get("/optionmultiselectquestions/{optionmultiselectquestions_id}", response_model=OptionMultiSelectQuestions)
+def get_option_multi_select_question(optionmultiselectquestions_id: int, session: Session = Depends(get_db)):
+    option_multi_select_question = session.get(OptionMultiSelectQuestions, optionmultiselectquestions_id)
+    if not option_multi_select_question:
+        raise HTTPException(status_code=404, detail="Option Multi Select Question not found")
+    return option_multi_select_question
+
+@app.get("/casestudies", response_model=list[CaseStudy])
+def get_case_studies(session: Session = Depends(get_db)):
+    case_studies = session.exec(select(CaseStudy)).all()
+    return case_studies
+
+@app.post("/casestudies", response_model=CaseStudy)
+def create_case_study(case_study: CaseStudy, session: Session = Depends(get_db)):
+    case_study_insert = CaseStudy.model_validate(case_study)
+    session.add(case_study_insert)
+    session.commit()
+    session.refresh(case_study_insert)
+    return case_study_insert
+
+@app.get("/casestudies/{casestudies_id}", response_model=CaseStudy)
+def get_case_study(casestudies_id: int, session: Session = Depends(get_db)):
+    case_study = session.get(CaseStudy, casestudies_id)
+    if not case_study:
+        raise HTTPException(status_code=404, detail="Case Study not found")
+    return case_study
+
+@app.get("/codingquestions", response_model=list[CodingQuestions])
+def get_coding_questions(session: Session = Depends(get_db)):
+    coding_questions = session.exec(select(CodingQuestions)).all()
+    return coding_questions
+
+@app.post("/codingquestions", response_model=CodingQuestions)
+def create_coding_question(coding_question: CodingQuestions, session: Session = Depends(get_db)):
+    coding_question_insert = CodingQuestions.model_validate(coding_question)
+    session.add(coding_question_insert)
+    session.commit()
+    session.refresh(coding_question_insert)
+    return coding_question_insert
+
+@app.get("/codingquestions/{codingquestions_id}", response_model=CodingQuestions)
+def get_coding_question(codingquestions_id: int, session: Session = Depends(get_db)):
+    coding_question = session.get(CodingQuestions, codingquestions_id)
+    if not coding_question:
+        raise HTTPException(status_code=404, detail="Coding Question not found")
+    return coding_question
+
+
+
 
 @app.get("/answersheets", response_model=list[AnswerSheet])
 def get_answer_sheets(session: Session = Depends(get_db)):
