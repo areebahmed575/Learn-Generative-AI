@@ -259,12 +259,17 @@ def get_topics(session: Session = Depends(get_db)):
 
 @app.post("/topics", response_model=Topic)
 def create_topic(topic: Topic, session: Session = Depends(get_db)):
-    print("Data from client:",topic)
-    topic_insert = Topic.model_validate(topic)
-    session.add(topic_insert)
+    existing_course = session.exec(select(Course).filter(Course.id == topic.course_id)).first()
+    if not existing_course:
+        raise HTTPException(status_code=400, detail="The specified course does not exist.")
+
+    topic.course = existing_course
+    session.add(topic)
     session.commit()
-    session.refresh(topic_insert)
-    return topic_insert
+    session.refresh(topic)
+
+    return topic
+
 
 @app.get("/topics/{topic_id}", response_model=Topic)
 def get_topic(topic_id: int, session: Session = Depends(get_db)):
@@ -272,6 +277,56 @@ def get_topic(topic_id: int, session: Session = Depends(get_db)):
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
     return topic
+    
+@app.get("/quizzes", response_model=list[Quiz])
+def get_quizzes(session: Session = Depends(get_db)):
+    quizzes = session.exec(select(Quiz)).all()
+    return quizzes
+
+# @app.post("/quizzes", response_model=Quiz)
+# def create_quiz(quiz: Quiz, session: Session = Depends(get_db)):
+#     existing_quiz = session.exec(select(Course).filter(Course.id == quiz.course_id)).first()
+#     if not existing_quiz:
+#         raise HTTPException(status_code=400, detail="The specified course does not exist.")
+
+#     quiz.course = existing_quiz
+#     session.add(quiz)
+#     session.commit()
+#     session.refresh(quiz)
+
+#     return quiz
+    
+@app.post("/quizzes", response_model=Quiz)
+def create_quiz(quiz: Quiz, session: Session = Depends(get_db)):
+    existing_course = session.get(Course, quiz.course_id)
+    if not existing_course:
+        raise HTTPException(status_code=400, detail="The specified course does not exist.")
+
+    # Since we found the existing course, we assign it to the quiz
+    quiz.course = existing_course
+
+    session.add(quiz)
+    session.commit()
+    session.refresh(quiz)
+
+    return quiz
+
+
+
+
+
+@app.get("/quizzes/{quiz_id}", response_model=Quiz)
+def get_quiz(quiz_id: int, session: Session = Depends(get_db)):
+    quiz = session.get(Quiz, quiz_id)
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    return quiz
+
+
+
+
+
+
 
 @app.get("/quiztopics", response_model=list[QuizTopics])
 def get_quiz_topics(session: Session = Depends(get_db)):
@@ -280,21 +335,27 @@ def get_quiz_topics(session: Session = Depends(get_db)):
 
 @app.post("/quiztopics", response_model=QuizTopics)
 def create_quiz_topic(quiz_topic: QuizTopics, session: Session = Depends(get_db)):
-    # Assuming the attributes are named 'quiz_name' and 'quiz_description' in your model
-    topic_data = {
-    "topic_name": quiz_topic.quiz_name,  # Assuming quiz_name corresponds to topic_name
-    }
-    new_topic = QuizTopics(**topic_data)
-    # Validate the QuizTopics object
-    if new_topic is None:
-        raise HTTPException(status_code=400, detail="Invalid topic data")
-        
-    # Add the new_topic to the session and commit the transaction
-    session.add(new_topic)
+    # Validate if the quiz_id and topic_id are valid
+    existing_quiz = session.get(Quiz, quiz_topic.quiz_id)
+    existing_topic = session.get(Topic, quiz_topic.topic_id)
+    if not existing_quiz or not existing_topic:
+        raise HTTPException(status_code=400, detail="Invalid quiz_id or topic_id")
+
+    # Create a new QuizTopics object
+    new_quiz_topic = QuizTopics(
+        quiz_id=quiz_topic.quiz_id,
+        topic_id=quiz_topic.topic_id,
+        parent_quiz_topic_id=quiz_topic.parent_quiz_topic_id,
+        quiz_name=quiz_topic.quiz_name
+    )
+
+    # Add the new_quiz_topic to the session and commit the transaction
+    session.add(new_quiz_topic)
     session.commit()
-    session.refresh(new_topic)
-    
-    return new_topic
+    session.refresh(new_quiz_topic)
+
+    return new_quiz_topic
+
 
 
 @app.get("/quiztopics/{quiz_topic_id}", response_model=QuizTopics)
@@ -337,28 +398,7 @@ def get_content(content_id: int, session: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Content not found")
     return content
 
-@app.get("/quizzes", response_model=list[Quiz])
-def get_quizzes(session: Session = Depends(get_db)):
-    quizzes = session.exec(select(Quiz)).all()
-    return quizzes
 
-@app.post("/quizzes", response_model=Quiz)
-def create_quiz(quiz: Quiz, session: Session = Depends(get_db)):
-    if quiz.course_id is None or quiz.course_id <= 0:
-        raise HTTPException(status_code=400, detail="Invalid course_id provided") 
-    print("Data from client:",quiz)
-    quiz_insert = Quiz.model_validate(quiz)
-    session.add(quiz_insert)
-    session.commit()
-    session.refresh(quiz_insert)
-    return quiz_insert
-
-@app.get("/quizzes/{quiz_id}", response_model=Quiz)
-def get_quiz(quiz_id: int, session: Session = Depends(get_db)):
-    quiz = session.get(Quiz, quiz_id)
-    if not quiz:
-        raise HTTPException(status_code=404, detail="Quiz not found")
-    return quiz
 
 @app.get("/questions", response_model=list[Question])
 def get_questions(session: Session = Depends(get_db)):
