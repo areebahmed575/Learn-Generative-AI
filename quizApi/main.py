@@ -78,14 +78,16 @@ class McqsType(str,Enum):
     type4: str = "Type 4"    
 
 
-class SingleSelectMcqs(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
+  
+class SingleSelectMcqs(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
     question_id: int | None = Field(default=None, foreign_key="question.id")
     mcqs_type: McqsType
     question: Question = Relationship(back_populates="single_select_mcqs") # one to one
     options: list["SingleOptions"] = Relationship(back_populates="single_select_mcqs") # one to many
     case_study_id: int | None = Field(default=None, foreign_key="casestudy.id")
-    case_studies: list["CaseStudy"] = Relationship(back_populates="single_select_mcqs")  
+    case_studies: list["CaseStudy"] = Relationship(back_populates="single_select_mcqs")
+
 
 
 class SingleOptions(SQLModel,table=True):
@@ -157,6 +159,9 @@ class SingleSelectMcqsAns(SQLModel,table=True):
     mcqs_id: int
     selected_mcqs_id: int
     answer: Answer = Relationship(back_populates="single_select_mcqs_ans") # many to one
+
+
+    
 
 
 class MultiSelectMcqsAns(SQLModel,table=True):
@@ -428,11 +433,25 @@ def get_single_select_mcqs(session: Session = Depends(get_db)):
 
 @app.post("/singleselectmcqs", response_model=SingleSelectMcqs)
 def create_single_select_mcqs(single_select_mcqs: SingleSelectMcqs, session: Session = Depends(get_db)):
-    single_select_mcqs_insert = SingleSelectMcqs.model_validate(single_select_mcqs)
-    session.add(single_select_mcqs_insert)
+    # Validate if the question_id and case_study_id are valid
+    existing_question = session.get(Question, single_select_mcqs.question_id)
+    existing_case_study = session.get(CaseStudy, single_select_mcqs.case_study_id)
+    if not existing_question or not existing_case_study:
+        raise HTTPException(status_code=400, detail="Invalid question_id or case_study_id")
+
+    # Create a new SingleSelectMcqs object
+    new_single_select_mcqs = SingleSelectMcqs(
+        question_id=single_select_mcqs.question_id,
+        mcqs_type=single_select_mcqs.mcqs_type,
+        case_study_id=single_select_mcqs.case_study_id
+    )
+
+    # Add the new_single_select_mcqs to the session and commit the transaction
+    session.add(new_single_select_mcqs)
     session.commit()
-    session.refresh(single_select_mcqs_insert)
-    return single_select_mcqs_insert
+    session.refresh(new_single_select_mcqs)
+
+    return new_single_select_mcqs
 
 @app.get("/singleselectmcqs/{singleselectmcqs_id}", response_model=SingleSelectMcqs)
 def get_single_select_mcq(singleselectmcqs_id: int, session: Session = Depends(get_db)):
@@ -448,11 +467,26 @@ def get_single_options(session: Session = Depends(get_db)):
 
 @app.post("/singleoptions", response_model=SingleOptions)
 def create_single_option(single_option: SingleOptions, session: Session = Depends(get_db)):
-    single_option_insert = SingleOptions.model_validate(single_option)
-    session.add(single_option_insert)
+    # Validate if the single_select_id is valid
+    existing_single_select_mcqs = session.get(SingleSelectMcqs, single_option.single_select_id)
+    if not existing_single_select_mcqs:
+        raise HTTPException(status_code=400, detail="Invalid single_select_id")
+
+    # Create a new SingleOptions object
+    new_single_option = SingleOptions(
+        single_select_id=single_option.single_select_id,
+        option_text=single_option.option_text,
+        is_correct=single_option.is_correct
+    )
+
+    # Add the new_single_option to the session and commit the transaction
+    session.add(new_single_option)
     session.commit()
-    session.refresh(single_option_insert)
-    return single_option_insert
+    session.refresh(new_single_option)
+
+    return new_single_option
+
+
 
 @app.get("/singleoptions/{singleoptions_id}", response_model=SingleOptions)
 def get_single_option(singleoptions_id: int, session: Session = Depends(get_db)):

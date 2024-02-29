@@ -5,3 +5,5 @@ question
 topic
 quiz
 quizTopic
+singleselectmcqs
+singleoption
