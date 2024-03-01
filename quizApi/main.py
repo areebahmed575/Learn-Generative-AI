@@ -502,11 +502,18 @@ def get_multi_select_mcqs(session: Session = Depends(get_db)):
 
 @app.post("/multiselectmcqs", response_model=MultiSelectMcqs)
 def create_multi_select_mcqs(multi_select_mcqs: MultiSelectMcqs, session: Session = Depends(get_db)):
-    multi_select_mcqs_insert = MultiSelectMcqs.model_validate(multi_select_mcqs)
-    session.add(multi_select_mcqs_insert)
+    # Assuming 'question_id' is properly provided in the MultiSelectMcqs instance
+    # Validate the incoming MultiSelectMcqs object
+    if not multi_select_mcqs.question_id:
+        raise HTTPException(status_code=400, detail="Missing question_id")
+
+    # Add the MultiSelectMcqs instance to the session and commit the transaction
+    session.add(multi_select_mcqs)
     session.commit()
-    session.refresh(multi_select_mcqs_insert)
-    return multi_select_mcqs_insert
+    session.refresh(multi_select_mcqs)
+
+    return multi_select_mcqs
+
 
 @app.get("/multiselectmcqs/{multiselectmcqs_id}", response_model=MultiSelectMcqs)
 def get_multi_select_mcq(multiselectmcqs_id: int, session: Session = Depends(get_db)):
@@ -522,11 +529,18 @@ def get_option_multi_select_questions(session: Session = Depends(get_db)):
 
 @app.post("/optionmultiselectquestions", response_model=OptionMultiSelectQuestions)
 def create_option_multi_select_question(option_multi_select_question: OptionMultiSelectQuestions, session: Session = Depends(get_db)):
-    option_multi_select_question_insert = OptionMultiSelectQuestions.model_validate(option_multi_select_question)
-    session.add(option_multi_select_question_insert)
+    # Assuming 'multi_select_id' is properly provided in the OptionMultiSelectQuestions instance
+    # Validate the incoming OptionMultiSelectQuestions object
+    if not option_multi_select_question.multi_select_id:
+        raise HTTPException(status_code=400, detail="Missing multi_select_id")
+
+    # Add the OptionMultiSelectQuestions instance to the session and commit the transaction
+    session.add(option_multi_select_question)
     session.commit()
-    session.refresh(option_multi_select_question_insert)
-    return option_multi_select_question_insert
+    session.refresh(option_multi_select_question)
+
+    return option_multi_select_question
+
 
 @app.get("/optionmultiselectquestions/{optionmultiselectquestions_id}", response_model=OptionMultiSelectQuestions)
 def get_option_multi_select_question(optionmultiselectquestions_id: int, session: Session = Depends(get_db)):
@@ -562,11 +576,18 @@ def get_coding_questions(session: Session = Depends(get_db)):
 
 @app.post("/codingquestions", response_model=CodingQuestions)
 def create_coding_question(coding_question: CodingQuestions, session: Session = Depends(get_db)):
-    coding_question_insert = CodingQuestions.model_validate(coding_question)
-    session.add(coding_question_insert)
+    # Assuming 'question_id' is properly provided in the CodingQuestions instance
+    # Validate the incoming CodingQuestions object
+    if not coding_question.question_id:
+        raise HTTPException(status_code=400, detail="Missing question_id")
+
+    # Add the CodingQuestions instance to the session and commit the transaction
+    session.add(coding_question)
     session.commit()
-    session.refresh(coding_question_insert)
-    return coding_question_insert
+    session.refresh(coding_question)
+
+    return coding_question
+
 
 @app.get("/codingquestions/{codingquestions_id}", response_model=CodingQuestions)
 def get_coding_question(codingquestions_id: int, session: Session = Depends(get_db)):
@@ -585,12 +606,17 @@ def get_answer_sheets(session: Session = Depends(get_db)):
 
 @app.post("/answersheets", response_model=AnswerSheet)
 def create_answer_sheet(answer_sheet: AnswerSheet, session: Session = Depends(get_db)):
-    print("Data from client:",answer_sheet)
-    answer_sheet_insert = AnswerSheet.model_validate(answer_sheet)
-    session.add(answer_sheet_insert)
+    # Assuming 'quiz_id' is properly provided in the AnswerSheet instance
+    # Validate the incoming AnswerSheet object
+    if not answer_sheet.quiz_id:
+        raise HTTPException(status_code=400, detail="Missing quiz_id")
+
+    # Add the AnswerSheet instance to the session and commit the transaction
+    session.add(answer_sheet)
     session.commit()
-    session.refresh(answer_sheet_insert)
-    return answer_sheet_insert
+    session.refresh(answer_sheet)
+
+    return answer_sheet
 
 @app.get("/answersheets/{answer_sheet_id}", response_model=AnswerSheet)
 def get_answer_sheet(answer_sheet_id: int, session: Session = Depends(get_db)):
@@ -606,12 +632,18 @@ def get_answers(session: Session = Depends(get_db)):
 
 @app.post("/answers", response_model=Answer)
 def create_answer(answer: Answer, session: Session = Depends(get_db)):
-    print("Data from client:",answer)
-    answer_insert = Answer.model_validate(answer)
-    session.add(answer_insert)
+    # Assuming 'answer_sheet_id' is properly provided in the Answer instance
+    # Validate the incoming Answer object
+    if not answer.answer_sheet_id:
+        raise HTTPException(status_code=400, detail="Missing answer_sheet_id")
+
+    # Add the Answer instance to the session and commit the transaction
+    session.add(answer)
     session.commit()
-    session.refresh(answer_insert)
-    return answer_insert
+    session.refresh(answer)
+
+    return answer
+
 
 @app.get("/answers/{answer_id}", response_model=Answer)
 def get_answer(answer_id: int, session: Session = Depends(get_db)):
@@ -629,11 +661,17 @@ def get_single_select_mcqs_ans(session: Session = Depends(get_db)):
 
 @app.post("/singleselectmcqsans", response_model=SingleSelectMcqsAns)
 def create_single_select_mcqs_ans(single_select_mcqs_ans: SingleSelectMcqsAns, session: Session = Depends(get_db)):
-    single_select_mcqs_ans_insert = SingleSelectMcqsAns.model_validate(single_select_mcqs_ans)
-    session.add(single_select_mcqs_ans_insert)
+    # Assuming 'answer_id' is properly provided in the SingleSelectMcqsAns instance
+    # Validate the incoming SingleSelectMcqsAns object
+    if not single_select_mcqs_ans.answer_id:
+        raise HTTPException(status_code=400, detail="Missing answer_id")
+
+    # Add the SingleSelectMcqsAns instance to the session and commit the transaction
+    session.add(single_select_mcqs_ans)
     session.commit()
-    session.refresh(single_select_mcqs_ans_insert)
-    return single_select_mcqs_ans_insert
+    session.refresh(single_select_mcqs_ans)
+
+    return single_select_mcqs_ans
 
 @app.get("/singleselectmcqsans/{singleselectmcqsans_id}", response_model=SingleSelectMcqsAns)
 def get_single_select_mcqs_ans(singleselectmcqsans_id: int, session: Session = Depends(get_db)):
@@ -649,11 +687,18 @@ def get_multi_select_mcqs_ans(session: Session = Depends(get_db)):
 
 @app.post("/multiselectmcqsans", response_model=MultiSelectMcqsAns)
 def create_multi_select_mcqs_ans(multi_select_mcqs_ans: MultiSelectMcqsAns, session: Session = Depends(get_db)):
-    multi_select_mcqs_ans_insert = MultiSelectMcqsAns.model_validate(multi_select_mcqs_ans)
-    session.add(multi_select_mcqs_ans_insert)
+    # Assuming 'answer_id' is properly provided in the MultiSelectMcqsAns instance
+    # Validate the incoming MultiSelectMcqsAns object
+    if not multi_select_mcqs_ans.answer_id:
+        raise HTTPException(status_code=400, detail="Missing answer_id")
+
+    # Add the MultiSelectMcqsAns instance to the session and commit the transaction
+    session.add(multi_select_mcqs_ans)
     session.commit()
-    session.refresh(multi_select_mcqs_ans_insert)
-    return multi_select_mcqs_ans_insert
+    session.refresh(multi_select_mcqs_ans)
+
+    return multi_select_mcqs_ans
+
 
 @app.get("/multiselectmcqsans/{multiselectmcqsans_id}", response_model=MultiSelectMcqsAns)
 def get_multi_select_mcqs_ans(multiselectmcqsans_id: int, session: Session = Depends(get_db)):
@@ -670,11 +715,17 @@ def get_option_multi_select_answers(session: Session = Depends(get_db)):
 
 @app.post("/optionmultiselectanswers", response_model=OptionMultiSelectAnswer)
 def create_option_multi_select_answer(option_multi_select_answer: OptionMultiSelectAnswer, session: Session = Depends(get_db)):
-    option_multi_select_answer_insert = OptionMultiSelectAnswer.model_validate(option_multi_select_answer)
-    session.add(option_multi_select_answer_insert)
+    # Assuming 'multiselect_mcqs_ans_id' is properly provided in the OptionMultiSelectAnswer instance
+    # Validate the incoming OptionMultiSelectAnswer object
+    if not option_multi_select_answer.multiselect_mcqs_ans_id:
+        raise HTTPException(status_code=400, detail="Missing multiselect_mcqs_ans_id")
+
+    # Add the OptionMultiSelectAnswer instance to the session and commit the transaction
+    session.add(option_multi_select_answer)
     session.commit()
-    session.refresh(option_multi_select_answer_insert)
-    return option_multi_select_answer_insert
+    session.refresh(option_multi_select_answer)
+
+    return option_multi_select_answer
 
 @app.get("/optionmultiselectanswers/{optionmultiselectanswers_id}", response_model=OptionMultiSelectAnswer)
 def get_option_multi_select_answer(optionmultiselectanswers_id: int, session: Session = Depends(get_db)):
@@ -691,11 +742,18 @@ def get_case_study_answers(session: Session = Depends(get_db)):
 
 @app.post("/casestudyans", response_model=CaseStudyAns)
 def create_case_study_answer(case_study_answer: CaseStudyAns, session: Session = Depends(get_db)):
-    case_study_answer_insert = CaseStudyAns.model_validate(case_study_answer)
-    session.add(case_study_answer_insert)
+    # Assuming 'answer_id' is properly provided in the CaseStudyAns instance
+    # Validate the incoming CaseStudyAns object
+    if not case_study_answer.answer_id:
+        raise HTTPException(status_code=400, detail="Missing answer_id")
+
+    # Add the CaseStudyAns instance to the session and commit the transaction
+    session.add(case_study_answer)
     session.commit()
-    session.refresh(case_study_answer_insert)
-    return case_study_answer_insert
+    session.refresh(case_study_answer)
+
+    return case_study_answer
+
 
 @app.get("/casestudyans/{casestudyans_id}", response_model=CaseStudyAns)
 def get_case_study_answer(casestudyans_id: int, session: Session = Depends(get_db)):
@@ -711,11 +769,18 @@ def get_join_case_study_answers(session: Session = Depends(get_db)):
 
 @app.post("/joincasestudyanswers", response_model=JoinCaseStudyAnswer)
 def create_join_case_study_answer(join_case_study_answer: JoinCaseStudyAnswer, session: Session = Depends(get_db)):
-    join_case_study_answer_insert = JoinCaseStudyAnswer.model_validate(join_case_study_answer)
-    session.add(join_case_study_answer_insert)
+    # Assuming 'case_study_ans_id' is properly provided in the JoinCaseStudyAnswer instance
+    # Validate the incoming JoinCaseStudyAnswer object
+    if not join_case_study_answer.case_study_ans_id:
+        raise HTTPException(status_code=400, detail="Missing case_study_ans_id")
+
+    # Add the JoinCaseStudyAnswer instance to the session and commit the transaction
+    session.add(join_case_study_answer)
     session.commit()
-    session.refresh(join_case_study_answer_insert)
-    return join_case_study_answer_insert
+    session.refresh(join_case_study_answer)
+
+    return join_case_study_answer
+
 
 @app.get("/joincasestudyanswers/{joincasestudyanswers_id}", response_model=JoinCaseStudyAnswer)
 def get_join_case_study_answer(joincasestudyanswers_id: int, session: Session = Depends(get_db)):
@@ -731,11 +796,18 @@ def get_coding_questions_answers(session: Session = Depends(get_db)):
 
 @app.post("/codingquestionsanswers", response_model=CodingQuestionsAnswer)
 def create_coding_questions_answer(coding_questions_answer: CodingQuestionsAnswer, session: Session = Depends(get_db)):
-    coding_questions_answer_insert = CodingQuestionsAnswer.model_validate(coding_questions_answer)
-    session.add(coding_questions_answer_insert)
+    # Assuming 'answer_id' is properly provided in the CodingQuestionsAnswer instance
+    # Validate the incoming CodingQuestionsAnswer object
+    if not coding_questions_answer.answer_id:
+        raise HTTPException(status_code=400, detail="Missing answer_id")
+
+    # Add the CodingQuestionsAnswer instance to the session and commit the transaction
+    session.add(coding_questions_answer)
     session.commit()
-    session.refresh(coding_questions_answer_insert)
-    return coding_questions_answer_insert
+    session.refresh(coding_questions_answer)
+
+    return coding_questions_answer
+
 
 @app.get("/codingquestionsanswers/{codingquestionsanswers_id}", response_model=CodingQuestionsAnswer)
 def get_coding_questions_answer(codingquestionsanswers_id: int, session: Session = Depends(get_db)):

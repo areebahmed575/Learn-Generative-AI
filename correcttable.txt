@@ -1,9 +1,0 @@
-casestudy
-content
-course
-question
-topic
-quiz
-quizTopic
-singleselectmcqs
-singleoption
