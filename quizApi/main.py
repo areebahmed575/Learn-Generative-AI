@@ -85,8 +85,8 @@ class SingleSelectMcqs(SQLModel, table=True):
     mcqs_type: McqsType
     question: Question = Relationship(back_populates="single_select_mcqs") # one to one
     options: list["SingleOptions"] = Relationship(back_populates="single_select_mcqs") # one to many
-    case_study_id: int | None = Field(default=None, foreign_key="casestudy.id")
     case_studies: list["CaseStudy"] = Relationship(back_populates="single_select_mcqs")
+
 
 
 
@@ -118,10 +118,9 @@ class OptionMultiSelectQuestions(SQLModel,table=True):
 
 class CaseStudy(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
-    question_id: int | None = Field(default=None, foreign_key="question.id")
+    single_select_mcqs_id: int | None = Field(default=None, foreign_key="singleselectmcqs.id")
     mcqs_id : int
-    single_select_mcqs_id: int  # Foreign key linking to SingleSelectMcqs
-    single_select_mcqs: SingleSelectMcqs = Relationship(back_populates="case_studies") 
+    single_select_mcqs: SingleSelectMcqs = Relationship(back_populates="case_studies")  
 
 class CodingQuestions(SQLModel,table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -208,7 +207,7 @@ engine = create_engine(POSTGRESS_DB)
 
 
 def create_table():
-    # SQLModel.metadata.drop_all(engine)
+    #SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
 
 
@@ -435,15 +434,13 @@ def get_single_select_mcqs(session: Session = Depends(get_db)):
 def create_single_select_mcqs(single_select_mcqs: SingleSelectMcqs, session: Session = Depends(get_db)):
     # Validate if the question_id and case_study_id are valid
     existing_question = session.get(Question, single_select_mcqs.question_id)
-    existing_case_study = session.get(CaseStudy, single_select_mcqs.case_study_id)
-    if not existing_question or not existing_case_study:
+    if not existing_question :
         raise HTTPException(status_code=400, detail="Invalid question_id or case_study_id")
 
     # Create a new SingleSelectMcqs object
     new_single_select_mcqs = SingleSelectMcqs(
         question_id=single_select_mcqs.question_id,
         mcqs_type=single_select_mcqs.mcqs_type,
-        case_study_id=single_select_mcqs.case_study_id
     )
 
     # Add the new_single_select_mcqs to the session and commit the transaction
@@ -556,11 +553,18 @@ def get_case_studies(session: Session = Depends(get_db)):
 
 @app.post("/casestudies", response_model=CaseStudy)
 def create_case_study(case_study: CaseStudy, session: Session = Depends(get_db)):
-    case_study_insert = CaseStudy.model_validate(case_study)
-    session.add(case_study_insert)
+    # Assuming 'single_select_mcqs_id' is properly provided in the CaseStudy instance
+    # Validate the incoming CaseStudy object
+    if not case_study.single_select_mcqs_id:
+        raise HTTPException(status_code=400, detail="Missing single_select_mcqs_id")
+
+    # Add the CaseStudy instance to the session and commit the transaction
+    session.add(case_study)
     session.commit()
-    session.refresh(case_study_insert)
-    return case_study_insert
+    session.refresh(case_study)
+
+    return case_study
+
 
 @app.get("/casestudies/{casestudies_id}", response_model=CaseStudy)
 def get_case_study(casestudies_id: int, session: Session = Depends(get_db)):
