@@ -4,198 +4,8 @@ from typing import Annotated,Optional
 from enum import Enum
 from datetime import datetime
 from fastapi import Depends
-
-
-
-class Course(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    program_id : int
-    instructor_id : int
-    course_name: str
-    topics : list["Topic"] = Relationship(back_populates="course")  # one to many
-    quizes : list["Quiz"] = Relationship(back_populates="course")  # one to many or #one to one
-
-
-class Topic(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    course_id: int | None = Field(default=None, foreign_key="course.id")
-    topic_name: str
-    topic_description: str
-    course: Course = Relationship(back_populates="topics") # many to one
-    contents: list["Content"] = Relationship(back_populates="topic") # one to many
-    quiz_topics: list["QuizTopics"] = Relationship(back_populates="topic") # one to many
-
-class Content(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    topic_id : Optional[int] = Field(foreign_key="topic.id")
-    topic: Topic = Relationship(back_populates="contents") # many to one
-
-class Quiz(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    course_id: int | None = Field(default=None, foreign_key="course.id")
-    quiz_name: str
-    quiz_time: datetime
-    quiz_description : str
-    course: Course = Relationship(back_populates="quizes") # many to one
-    answer_sheets: list["AnswerSheet"] = Relationship(back_populates="quiz") # one to many
-    quiz_topics: list["QuizTopics"] = Relationship(back_populates="quiz") # one to many
-
-
-class QuizTopics(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    quiz_id: int | None = Field(default=None, foreign_key="quiz.id")
-    topic_id: int | None = Field(default=None, foreign_key="topic.id")
-    parent_quiz_topic_id: int | None = Field(default=None, foreign_key="quiztopics.id")
-    quiz_name : str|None = None
-    quiz: Quiz = Relationship(back_populates="quiz_topics") # many to one
-    topic: Topic = Relationship(back_populates="quiz_topics") # many to one
-
-class QuestionType(str, Enum):
-    single_select = "single_select"
-    multi_select = "multi_select"
-    case_study = "case_study"
-    free_text = "free_text"
-    code_questions = "code_questions"
-    
-
-
-
-class Question(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    quiz_id: int | None = Field(default=None, foreign_key="quiz.id")
-    question_text: str
-    question_type: QuestionType
-    question_points: int
-    single_select_mcqs: "SingleSelectMcqs" = Relationship(back_populates="question")
-    multi_select_mcqs: "MultiSelectMcqs" = Relationship(back_populates="question")
-    coding_questions: "CodingQuestions" = Relationship(back_populates="question")
-    
-    
-class McqsType(str,Enum):
-    type1: str = "Type 1"
-    type2: str = "Type 2"
-    type3: str = "Type 3"
-    type4: str = "Type 4"    
-
-
-  
-class SingleSelectMcqs(SQLModel, table=True):
-    id: int = Field(default=None, primary_key=True)
-    question_id: int | None = Field(default=None, foreign_key="question.id")
-    mcqs_type: McqsType
-    question: Question = Relationship(back_populates="single_select_mcqs") # one to one
-    options: list["SingleOptions"] = Relationship(back_populates="single_select_mcqs") # one to many
-    case_studies: list["CaseStudy"] = Relationship(back_populates="single_select_mcqs")
-
-
-
-
-class SingleOptions(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    single_select_id : int | None = Field(default=None, foreign_key="singleselectmcqs.id")
-    option_text : str
-    is_correct : bool
-    single_select_mcqs: SingleSelectMcqs = Relationship(back_populates="options") # many to one
-    
-
-class MultiSelectMcqs(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    question_id: int | None = Field(default=None, foreign_key="question.id")
-    mcqs_id: int
-    question: Question = Relationship(back_populates="multi_select_mcqs") # one to one
-    options: list["OptionMultiSelectQuestions"] = Relationship(back_populates="multi_select_mcqs") # one to many
-
-
-    
-class OptionMultiSelectQuestions(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    multi_select_id : int | None = Field(default=None, foreign_key="multiselectmcqs.id")
-    option_text : str
-    is_correct : bool
-    multi_select_mcqs: MultiSelectMcqs = Relationship(back_populates="options") # many to one
-
-
-
-class CaseStudy(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    single_select_mcqs_id: int | None = Field(default=None, foreign_key="singleselectmcqs.id")
-    mcqs_id : int
-    single_select_mcqs: SingleSelectMcqs = Relationship(back_populates="case_studies")  
-
-class CodingQuestions(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    question_id: int | None = Field(default=None, foreign_key="question.id")
-    is_correct: bool
-    question: Question = Relationship(back_populates="coding_questions") # one to one
-
-
-
-
-class AnswerSheet(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    quiz_id: int | None = Field(default=None, foreign_key="quiz.id")
-    quiz_status: str
-    start_date: datetime  
-    end_date: datetime   
-    answers: list["Answer"] = Relationship(back_populates="answer_sheet") # one to many
-    quiz: Quiz = Relationship(back_populates="answer_sheets")  # Define the relationship with Quiz
-
-class Answer(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    correct_answer: str
-    points_received: int
-    answer_sheet_id: Optional[int] = Field(default=None, foreign_key="answersheet.id")
-    answer_sheet: AnswerSheet = Relationship(back_populates="answers")  # many to one
-    single_select_mcqs_ans: list["SingleSelectMcqsAns"] = Relationship(back_populates="answer")  # one to many
-    multi_select_mcqs_ans: list["MultiSelectMcqsAns"] = Relationship(back_populates="answer")  # one to many
-    case_study_ans: list["CaseStudyAns"] = Relationship(back_populates="answer")  # one to many
-    coding_questions_answer: list["CodingQuestionsAnswer"] = Relationship(back_populates="answer")  # one to many
-
-
-class SingleSelectMcqsAns(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    answer_id: int | None = Field(default=None, foreign_key="answer.id")
-    mcqs_id: int
-    selected_mcqs_id: int
-    answer: Answer = Relationship(back_populates="single_select_mcqs_ans") # many to one
-
-
-    
-
-
-class MultiSelectMcqsAns(SQLModel,table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    answer_id: int | None = Field(default=None, foreign_key="answer.id")
-    mcqs_id: int
-    answer: Answer = Relationship(back_populates="multi_select_mcqs_ans") # many to one
-    options: list["OptionMultiSelectAnswer"] = Relationship(back_populates="multi_select_mcqs_ans") # one to many
-
-class OptionMultiSelectAnswer(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    multiselect_mcqs_ans_id: int | None = Field(default=None, foreign_key="multiselectmcqsans.id")
-    selected_mcqs_id: int
-    multi_select_mcqs_ans: MultiSelectMcqsAns = Relationship(back_populates="options") # many to one
-
-class CaseStudyAns(SQLModel,table=True):
-    id : int | None = Field(default=None, primary_key=True)
-    answer_id : int | None = Field(default=None, foreign_key="answer.id")
-    answer: Answer = Relationship(back_populates="case_study_ans") # many to one
-    join_case_study_answer: list["JoinCaseStudyAnswer"] = Relationship(back_populates="case_study_ans") # one to many
-
-
-class JoinCaseStudyAnswer(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    case_study_ans_id: int | None = Field(default=None, foreign_key="casestudyans.id")
-    single_select_mcq_answer_id: int
-    case_study_ans: CaseStudyAns = Relationship(back_populates="join_case_study_answer")
-
-
-class CodingQuestionsAnswer(SQLModel,table=True):
-    id : int | None = Field(default=None, primary_key=True)
-    answer_id : int | None = Field(default=None, foreign_key="answer.id")
-    field_answer : str
-    answer: Answer = Relationship(back_populates="coding_questions_answer") # many to one
-   
+from model import Course,Topic,Content,Quiz,QuizTopics,Question,SingleSelectMcqs,SingleOptions,MultiSelectMcqs,OptionMultiSelectQuestions,CaseStudy,AnswerSheet,Answer,SingleSelectMcqsAns,MultiSelectMcqsAns,OptionMultiSelectAnswer,CaseStudyAns,JoinCaseStudyAnswer,CodingQuestionsAnswer,CodingQuestions
+ 
     
 
 
@@ -306,7 +116,7 @@ def create_quiz(quiz: Quiz, session: Session = Depends(get_db)):
     if not existing_course:
         raise HTTPException(status_code=400, detail="The specified course does not exist.")
 
-    # Since we found the existing course, we assign it to the quiz
+    
     quiz.course = existing_course
 
     session.add(quiz)
@@ -339,13 +149,13 @@ def get_quiz_topics(session: Session = Depends(get_db)):
 
 @app.post("/quiztopics", response_model=QuizTopics)
 def create_quiz_topic(quiz_topic: QuizTopics, session: Session = Depends(get_db)):
-    # Validate if the quiz_id and topic_id are valid
+    
     existing_quiz = session.get(Quiz, quiz_topic.quiz_id)
     existing_topic = session.get(Topic, quiz_topic.topic_id)
     if not existing_quiz or not existing_topic:
         raise HTTPException(status_code=400, detail="Invalid quiz_id or topic_id")
 
-    # Create a new QuizTopics object
+    
     new_quiz_topic = QuizTopics(
         quiz_id=quiz_topic.quiz_id,
         topic_id=quiz_topic.topic_id,
@@ -353,7 +163,7 @@ def create_quiz_topic(quiz_topic: QuizTopics, session: Session = Depends(get_db)
         quiz_name=quiz_topic.quiz_name
     )
 
-    # Add the new_quiz_topic to the session and commit the transaction
+    
     session.add(new_quiz_topic)
     session.commit()
     session.refresh(new_quiz_topic)
@@ -432,18 +242,18 @@ def get_single_select_mcqs(session: Session = Depends(get_db)):
 
 @app.post("/singleselectmcqs", response_model=SingleSelectMcqs)
 def create_single_select_mcqs(single_select_mcqs: SingleSelectMcqs, session: Session = Depends(get_db)):
-    # Validate if the question_id and case_study_id are valid
+    
     existing_question = session.get(Question, single_select_mcqs.question_id)
     if not existing_question :
         raise HTTPException(status_code=400, detail="Invalid question_id or case_study_id")
 
-    # Create a new SingleSelectMcqs object
+    
     new_single_select_mcqs = SingleSelectMcqs(
         question_id=single_select_mcqs.question_id,
         mcqs_type=single_select_mcqs.mcqs_type,
     )
 
-    # Add the new_single_select_mcqs to the session and commit the transaction
+    
     session.add(new_single_select_mcqs)
     session.commit()
     session.refresh(new_single_select_mcqs)
@@ -464,19 +274,19 @@ def get_single_options(session: Session = Depends(get_db)):
 
 @app.post("/singleoptions", response_model=SingleOptions)
 def create_single_option(single_option: SingleOptions, session: Session = Depends(get_db)):
-    # Validate if the single_select_id is valid
+    
     existing_single_select_mcqs = session.get(SingleSelectMcqs, single_option.single_select_id)
     if not existing_single_select_mcqs:
         raise HTTPException(status_code=400, detail="Invalid single_select_id")
 
-    # Create a new SingleOptions object
+    
     new_single_option = SingleOptions(
         single_select_id=single_option.single_select_id,
         option_text=single_option.option_text,
         is_correct=single_option.is_correct
     )
 
-    # Add the new_single_option to the session and commit the transaction
+    
     session.add(new_single_option)
     session.commit()
     session.refresh(new_single_option)
@@ -499,12 +309,12 @@ def get_multi_select_mcqs(session: Session = Depends(get_db)):
 
 @app.post("/multiselectmcqs", response_model=MultiSelectMcqs)
 def create_multi_select_mcqs(multi_select_mcqs: MultiSelectMcqs, session: Session = Depends(get_db)):
-    # Assuming 'question_id' is properly provided in the MultiSelectMcqs instance
-    # Validate the incoming MultiSelectMcqs object
+    
+    
     if not multi_select_mcqs.question_id:
         raise HTTPException(status_code=400, detail="Missing question_id")
 
-    # Add the MultiSelectMcqs instance to the session and commit the transaction
+    
     session.add(multi_select_mcqs)
     session.commit()
     session.refresh(multi_select_mcqs)
@@ -526,12 +336,10 @@ def get_option_multi_select_questions(session: Session = Depends(get_db)):
 
 @app.post("/optionmultiselectquestions", response_model=OptionMultiSelectQuestions)
 def create_option_multi_select_question(option_multi_select_question: OptionMultiSelectQuestions, session: Session = Depends(get_db)):
-    # Assuming 'multi_select_id' is properly provided in the OptionMultiSelectQuestions instance
-    # Validate the incoming OptionMultiSelectQuestions object
     if not option_multi_select_question.multi_select_id:
         raise HTTPException(status_code=400, detail="Missing multi_select_id")
 
-    # Add the OptionMultiSelectQuestions instance to the session and commit the transaction
+    
     session.add(option_multi_select_question)
     session.commit()
     session.refresh(option_multi_select_question)
@@ -553,12 +361,11 @@ def get_case_studies(session: Session = Depends(get_db)):
 
 @app.post("/casestudies", response_model=CaseStudy)
 def create_case_study(case_study: CaseStudy, session: Session = Depends(get_db)):
-    # Assuming 'single_select_mcqs_id' is properly provided in the CaseStudy instance
-    # Validate the incoming CaseStudy object
+    
     if not case_study.single_select_mcqs_id:
         raise HTTPException(status_code=400, detail="Missing single_select_mcqs_id")
 
-    # Add the CaseStudy instance to the session and commit the transaction
+    
     session.add(case_study)
     session.commit()
     session.refresh(case_study)
@@ -746,12 +553,11 @@ def get_case_study_answers(session: Session = Depends(get_db)):
 
 @app.post("/casestudyans", response_model=CaseStudyAns)
 def create_case_study_answer(case_study_answer: CaseStudyAns, session: Session = Depends(get_db)):
-    # Assuming 'answer_id' is properly provided in the CaseStudyAns instance
-    # Validate the incoming CaseStudyAns object
+   
     if not case_study_answer.answer_id:
         raise HTTPException(status_code=400, detail="Missing answer_id")
 
-    # Add the CaseStudyAns instance to the session and commit the transaction
+    
     session.add(case_study_answer)
     session.commit()
     session.refresh(case_study_answer)
