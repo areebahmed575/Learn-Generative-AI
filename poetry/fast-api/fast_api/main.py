@@ -15,3 +15,6 @@ def index():
 def piaic():
     return {"message": "piaic"}
 
+
+#poetry run uvicorn fast_api.main:app --reload
+
