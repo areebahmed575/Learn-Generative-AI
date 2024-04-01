@@ -1,2 +1,0 @@
-npm i sharp
-npm install @reduxjs/toolkit react-redux
