@@ -1,0 +1,10 @@
+# Conterization
+Dockerfile #filename
+FROM python:3.12 #base image #using my laptop os kernel so it's called cutting edge os
+LABEL maintainer="areebahmed575@gmail.com" #meta data #if image mai masla aajaye tou for contact
+RUN pip install poetry #install
+WORKDIR /code #work folder #agr directory nahi bani hwi tou banalo.Agr bani hwi h tou use krlo
+COPY source destination  #codebase
+COPY .       ./
+RUN poetry install
+CMD ["uvicorn" ,"run" ,"app.main:app" ,"--reload"] #for running application	
