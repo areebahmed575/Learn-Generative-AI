@@ -1,0 +1,8 @@
+Semantic Index is a vector database concept.In Vector Database,We have two kind of things one is Knowledge base and other is semantic index.With the help of semantic index,we build a different cluster so let's say king and queen would be appearing in the same cluster then men and women will be appearing in the same cluster and the monkey will be appearing in the different cluster so with the help of semantic index that can be possible it will calculate the distance between all the vector and it will create cluster  so this is idea of semantic index.Then I will create knowledge base like pinecone for storing vectors
+
+
+
+We are using ctransformers in Medical chatbot because we need to load the quantized model
+
+
+For embedding generation actually i need one embeddung model and that particular I'll download from hugging face itself so that's why i need sentence transformer libarary
