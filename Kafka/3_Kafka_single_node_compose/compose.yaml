@@ -32,9 +32,9 @@ services:
       KAFKA_CLUSTERS_0_NAME: 'Local Kafka Cluster'
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'broker:19092'
       DYNAMIC_CONFIG_ENABLED: "true"
-    depends_on:
+    depends_on: #depends_on: Ensures that the broker service starts before the kafka-ui service.
       - broker
 
-networks:
+networks: #Har container by default default network pick krta h.Tou hum default network k driver ko change krdiya takay woh aik dosray sai baat krskay.Intercommuniction allow hogaye
   default:
     driver: bridge
