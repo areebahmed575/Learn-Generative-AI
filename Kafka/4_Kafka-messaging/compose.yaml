@@ -5,7 +5,7 @@ services:
     build:
       context: ./todo
       dockerfile: Dockerfile.dev
-    volumes: # Mounts the ./todo directory inside the container to /code. This is typically used for live-reloading during development.
+    volumes:
       - ./todo:/code  # Sync local development directory with the container
     depends_on:
         - postgres_db
@@ -28,12 +28,12 @@ services:
     restart: always
     container_name: PostgresCont
     environment:
-        - POSTGRES_USER=areebahmed
+        - POSTGRES_USER=ziakhan
         - POSTGRES_PASSWORD=my_password
         - POSTGRES_DB=mydatabase
     ports:
         - '5433:5432'
-    volumes: #Persists PostgreSQL data between container restarts using a named volume postgres_db.
+    volumes:
         - postgres_db:/var/lib/postgresql/data
   broker:
     image: apache/kafka:3.7.0
@@ -68,7 +68,7 @@ services:
       DYNAMIC_CONFIG_ENABLED: "true"
     depends_on:
       - broker
-volumes: #postgres_db: Defines a named volume postgres_db that uses the local driver. This volume is used to persist PostgreSQL data.
+volumes:
   postgres_db:
     driver: local
 networks:
