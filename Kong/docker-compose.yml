@@ -1,3 +1,4 @@
+# 4 service h but sirf aik service up hoghi q k baki 3 mai profile h
 version: '3.9'
 
 x-kong-config:  #This is extension or variable.Below we are using it as kong-env
@@ -12,7 +13,7 @@ volumes:
   kong_data: {}
   kong_prefix_vol:
     driver_opts:
-      type: tmpfs
+      type: tmpfs  #tmpfs means temporary files system.Jaha mai chata ho k mai container k bahar ka container use kro.Yaha volume nahi bana raha or jaisy he data use  krlo tou data delete hojaye.Means k kahe persists nahi kr raha
       device: tmpfs
   kong_tmp_vol:
     driver_opts:
@@ -24,7 +25,7 @@ networks:
     driver: bridge
 
 services:
-  kong-migrations:
+  kong-migrations: #Jaisay he compose up hogha tou migration up hoghi for database schemas
     image: "${KONG_DOCKER_TAG:-kong:latest}"
     command: kong migrations bootstrap
     profiles: [ "database" ]
@@ -36,10 +37,10 @@ services:
       - kong_postgres_password
     restart: on-failure
 
-  kong-migrations-up:
+  kong-migrations-up:  #opper wali migratio n up honay k baad yeh chali ghi
     image: "${KONG_DOCKER_TAG:-kong:latest}"
     command: kong migrations up && kong migrations finish
-    profiles: [ "database" ]
+    profiles: [ "database" ] #This indicates that these services are part of a profile named "database".Jis service mai profile nahi hoti usmai profile default hoti h
     depends_on:
       - db
     environment:
@@ -77,12 +78,12 @@ services:
       - "127.0.0.1:8001:8001/tcp"
       - "127.0.0.1:8444:8444/tcp"
       - "127.0.0.1:8002:8002/tcp"
-    healthcheck:
+    healthcheck: #healthcheck means k service chal rahe h ya nahi
       test: [ "CMD", "kong", "health" ]
       interval: 10s
       timeout: 10s
       retries: 10
-    restart: on-failure:5
+    restart: on-failure:5 #agar service fail hogaye h tou restart 5 time he kro
     read_only: true
     volumes:
       - kong_prefix_vol:${KONG_PREFIX:-/var/run/kong}
