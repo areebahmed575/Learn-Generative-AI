@@ -1,0 +1,5 @@
+[tool.poetry]
+name = "app"
+version = "0.1.0"
+description = ""
+authors = ["Areeb Ahmed <areebahmed575.com>"]

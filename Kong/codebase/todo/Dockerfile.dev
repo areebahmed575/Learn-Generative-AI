@@ -22,8 +22,8 @@ RUN poetry config virtualenvs.create false
 # Install dependencies including development ones
 RUN poetry install
 
-# Make port 8000 available to the world outside this container
-EXPOSE 8000
+# Make port 8085 available to the world outside this container
+EXPOSE 8085
 
 # Run the app. CMD can be overridden when starting the container
-CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload"]
+CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8085", "--reload"]
