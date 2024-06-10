@@ -2,7 +2,15 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel
 from typing import Annotated
 
-app = FastAPI(title="Locaction Finder API", version="1.0.0")
+app = FastAPI(
+    title="Location Finder API", 
+    version="1.0.0",
+    servers=[
+        {
+            "url": "https://hedgehog-saving-shad.ngrok-free.app", # ADD NGROK URL Here Before Creating GPT Action
+            "description": "Development Server"
+        }
+        ])
 
 class Location(BaseModel):
     name: str
@@ -13,7 +21,7 @@ locations = {
     "ali": Location(name="Ali", location="Lahore"),
 }
 
-# depency function
+# dependency function
 def get_location_or_404(name:str)->Location:
     loc = locations.get(name.lower())
     if not loc:
@@ -24,6 +32,3 @@ def get_location_or_404(name:str)->Location:
 @app.get("/location/{name}")
 def get_person_location(name:str, location: Annotated[Location, Depends(get_location_or_404)]):
     return location
-
-#http://127.0.0.1:8000/openapi.json
-#open ai ko batana h k mairy api call krsktay h(action) tou aap yeh format call(open api->api specification)krsktay h
