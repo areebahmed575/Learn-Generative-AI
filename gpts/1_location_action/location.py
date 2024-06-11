@@ -7,7 +7,7 @@ app = FastAPI(
     version="1.0.0",
     servers=[
         {
-            "url": "https://hedgehog-saving-shad.ngrok-free.app", # ADD NGROK URL Here Before Creating GPT Action
+            "url": "http://monster-vital-mainly.ngrok-free.app", # ADD NGROK URL Here Before Creating GPT Action
             "description": "Development Server"
         }
         ])
