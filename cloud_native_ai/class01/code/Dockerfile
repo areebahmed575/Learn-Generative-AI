@@ -6,11 +6,11 @@ RUN pip install poetry
 
 COPY . . 
 
+RUN poetry config virtualenvs.create false
 
 RUN poetry install
 
-RUN poetry config virtualenvs.create false
+EXPOSE 8888
 
-EXPOSE 8000
+CMD ["jupyter", "notebook" ,"--port", "8888", "--no-browser" ,"--allow-root"]
 
-CMD ["jupyter", "notebook", "--port" , "8888", "--no-browser", "--allow-root"]
