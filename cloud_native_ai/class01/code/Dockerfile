@@ -4,7 +4,7 @@ WORKDIR /code
 
 RUN pip install poetry
 
-COPY . . 
+COPY . /code/
 
 RUN poetry config virtualenvs.create false
 
