@@ -7,16 +7,16 @@ This guide will walk you through the steps to run and containerize the microserv
 - Ensure you have Python and [Poetry](https://python-poetry.org/docs/#installation) installed.
 - Ensure you have Docker installed and running on your machine.
 
-## Step 1: Running the App without Docker
+## Running the App without Docker
 
-### 1.1 Update `pyproject.toml`
+### Update `pyproject.toml`
 
 Use the following as a base for your `pyproject.toml` file:
 [Full Stack FastAPI Template - `pyproject.toml`](https://github.com/tiangolo/full-stack-fastapi-template/blob/master/backend/pyproject.toml)
 
 Review each dependency in the `toml` file to understand the different libraries used in development.
 
-### 1.2 Install Dependencies
+### Install Dependencies
 
 Install the project dependencies using Poetry:
 
@@ -25,7 +25,7 @@ Install the project dependencies using Poetry:
   <pre id="install-command"><code>poetry install</code></pre>
 </div>
 
-### 1.3 Run the Project
+###  Run the Project
 
 Run the project in the Poetry environment to see if it is running outside a container:
 
@@ -34,13 +34,13 @@ Run the project in the Poetry environment to see if it is running outside a cont
   <pre id="run-command"><code>poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000</code></pre>
 </div>
 
-### 1.4 Open in Browser
+###  Open in Browser
 
 - [API Root](http://0.0.0.0:8000/)
 - [API Documentation](http://0.0.0.0:8000/docs)
 - [OpenAPI JSON](http://0.0.0.0:8000/openapi.json)
 
-### 1.5 Run Tests
+### Run Tests
 
 Run tests to ensure everything is working correctly:
 
@@ -49,11 +49,11 @@ Run tests to ensure everything is working correctly:
   <pre id="test-command"><code>poetry run pytest</code></pre>
 </div>
 
-## Step 2: Containerizing the App
+##  Containerizing the App
 
 Follow the FastAPI Docker deployment guide: [FastAPI Deployment - Docker](https://fastapi.tiangolo.com/deployment/docker/)
 
-### 2.1 Check Docker Installation
+###  Check Docker Installation
 
 Ensure Docker is installed and running:
 
@@ -62,7 +62,7 @@ Ensure Docker is installed and running:
   <pre id="docker-version-command"><code>docker version</code></pre>
 </div>
 
-### 2.2 Build the Docker Image for Development
+###  Build the Docker Image for Development
 
 Build the Docker image using the `Dockerfile.dev`:
 
@@ -71,7 +71,7 @@ Build the Docker image using the `Dockerfile.dev`:
   <pre id="docker-build-command"><code>docker build -f Dockerfile.dev -t my-dev-image .</code></pre>
 </div>
 
-### 2.3 Check Docker Images
+###  Check Docker Images
 
 List Docker images to verify the new image:
 
@@ -80,7 +80,7 @@ List Docker images to verify the new image:
   <pre id="docker-images-command"><code>docker images</code></pre>
 </div>
 
-### 2.4 Verify Docker Image Configuration
+###  Verify Docker Image Configuration
 
 Inspect the Docker image configuration:
 
@@ -89,7 +89,7 @@ Inspect the Docker image configuration:
   <pre id="docker-inspect-command"><code>docker inspect my-dev-image</code></pre>
 </div>
 
-### 2.5 Run the Docker Container for Development
+###  Run the Docker Container for Development
 
 Run the container in detached mode and map the port:
 
@@ -98,11 +98,11 @@ Run the container in detached mode and map the port:
   <pre id="docker-run-command"><code>docker run -d --name dev-cont1 -p 8000:8000 my-dev-image</code></pre>
 </div>
 
-### 2.6 Check in Browser
+###  Check in Browser
 
 - [API Root](http://localhost:8000)
 
-### 2.7 Container Logs
+###  Container Logs
 
 View container logs:
 
@@ -111,7 +111,7 @@ View container logs:
   <pre id="docker-logs-command"><code>docker logs dev-cont1</code></pre>
 </div>
 
-### 2.8 Test the Container
+###  Test the Container
 
 Run tests inside the container:
 
@@ -120,7 +120,7 @@ Run tests inside the container:
   <pre id="docker-test-command"><code>docker run -it --rm my-dev-image /bin/bash -c "poetry run pytest"</code></pre>
 </div>
 
-### 2.9 List Running Containers
+###  List Running Containers
 
 List currently running containers:
 
@@ -129,7 +129,7 @@ List currently running containers:
   <pre id="docker-ps-command"><code>docker ps</code></pre>
 </div>
 
-### 2.10 List All Containers
+###  List All Containers
 
 List all containers, including stopped ones:
 
@@ -138,7 +138,7 @@ List all containers, including stopped ones:
   <pre id="docker-ps-a-command"><code>docker ps -a</code></pre>
 </div>
 
-### 2.11 Interact with the Container
+###  Interact with the Container
 
 Access the container shell:
 
@@ -147,7 +147,7 @@ Access the container shell:
   <pre id="docker-exec-command"><code>docker exec -it dev-cont1 /bin/bash</code></pre>
 </div>
 
-### 2.12 Exit from the Container Shell
+###  Exit from the Container Shell
 
 Exit from the container shell:
 
@@ -156,17 +156,3 @@ Exit from the container shell:
   <pre id="exit-command"><code>exit</code></pre>
 </div>
 
-## Conclusion
-
-Following these steps will help you containerize your FastAPI microservice for a development environment. Ensure to follow best practices for production environments when deploying your containers.
-
-<script>
-  function copyToClipboard(element) {
-    var text = document.querySelector(element).innerText;
-    navigator.clipboard.writeText(text).then(function() {
-      alert('Copied to clipboard');
-    }, function(err) {
-      console.error('Could not copy text: ', err);
-    });
-  }
-</script>
