@@ -156,3 +156,6 @@ Exit from the container shell:
   <pre id="exit-command"><code>exit</code></pre>
 </div>
 
+
+
+Installed azure account  and azure container app registry extensions then on azure account extension click container apps create container app environment,then check environment on portal and then create container app from workspace,select dockerfile and then it ask permissions for container registry,click on OK and give name.Your app is deployed on Azure.
