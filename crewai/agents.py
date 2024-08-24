@@ -7,7 +7,7 @@ load_dotenv()
 
 import os
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
-os.environ["OPENAI_MODEL_NAME"]="gpt-4-0125-preview"
+os.environ["OPENAI_MODEL_NAME"]="gpt-4o-mini"
 
 
 ## Create a senior blog content researcher
