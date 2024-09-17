@@ -1,96 +1,95 @@
-# functions.py
+import os
+import requests
+from dotenv import load_dotenv, find_dotenv
 
-# Define the functions that will be called by the assistant
-def update_map(longitude: float, latitude: float, zoom: int):
+
+load_dotenv(find_dotenv())
+
+
+MAPBOX_ACCESS_TOKEN = os.getenv('MAPBOX_ACCESS_TOKEN')
+
+if not MAPBOX_ACCESS_TOKEN:
+    raise ValueError("Mapbox access token not found in environment variables.")
+
+def geocode_place(place_name: str):
+    
+    if place_name.strip().lower() == "kashmir":
+        query = "Azad Jammu and Kashmir, Pakistan"
+    else:
+        query = f"{place_name}, Pakistan"
+    
+    url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{requests.utils.quote(query)}.json"
+    params = {
+        'access_token': MAPBOX_ACCESS_TOKEN,
+        'limit': 1,
+        'country': 'PK',
+    }
+    response = requests.get(url, params=params)
+    data = response.json()
+    if response.status_code == 200 and data['features']:
+        
+        longitude, latitude = data['features'][0]['center']
+        print(f"Geocoded '{query}': longitude={longitude}, latitude={latitude}")
+        return longitude, latitude  
+    else:
+        
+        params.pop('country', None)
+        response = requests.get(url, params=params)
+        data = response.json()
+        if response.status_code == 200 and data['features']:
+            longitude, latitude = data['features'][0]['center']
+            print(f"Geocoded '{query}' without country filter: longitude={longitude}, latitude={latitude}")
+            return longitude, latitude
+        else:
+            raise ValueError(f"Could not geocode place: {place_name}")
+
+def update_map(place_name: str, zoom: int = 12):
+    longitude, latitude = geocode_place(place_name)
     return {
         "action": "update_map",
-        "latitude": latitude,
         "longitude": longitude,
+        "latitude": latitude,
         "zoom": zoom,
     }
 
-def add_markers(latitudes: list, longitudes: list, labels: list):
-    return {
-        "action": "add_markers",
-        "latitudes": latitudes,
-        "longitudes": longitudes,
-        "labels": labels,
-    }
-
-# Map function names to actual functions
 available_functions = {
     "update_map": update_map,
-    "add_markers": add_markers,
 }
 
-# Define the instruction for the assistant
+
 INSTRUCTION = (
-    "You are a helpful travel assistant that can write and execute code, "
-    "and has access to a digital map to display information. For any location "
-    "the user asks about or asks to navigate to, you should be able to display "
-    "the location on the map. You should also be able to display multiple "
-    "locations on the map. Add annotations on the map for suggestions and trip planning as well."
+    "You are a helpful travel assistant specializing in Pakistan's tourism. "
+    "When a user asks about places, provide information only about tourist attractions within Pakistan. "
+    "Present information in plain text without any Markdown or special formatting. "
+    "If the user asks about a specific city or attraction, provide details and use the `update_map` function "
+    "to center the map on that place. "
+    "If the user asks about Kashmir, provide information only about the Pakistan-administered region known as Azad Jammu and Kashmir. "
+    "Do not mention or provide information about places in Indian-administered Kashmir. "
+    "Do not provide information about places outside Pakistan. "
+    "Always ensure that any place names you mention are accurate and within Pakistan."
 )
 
-# Define the tools (functions) that the assistant can use
 tools = [
     {
         "type": "function",
         "function": {
             "name": "update_map",
-            "description": "Update map to center on a particular location",
+            "description": "Update map to center on a particular place in Pakistan",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "longitude": {
-                        "type": "number",
-                        "description": "Longitude of the location to center the map on"
-                    },
-                    "latitude": {
-                        "type": "number",
-                        "description": "Latitude of the location to center the map on"
+                    "place_name": {
+                        "type": "string",
+                        "description": "Name of the place in Pakistan to center the map on"
                     },
                     "zoom": {
                         "type": "integer",
-                        "description": "Zoom level of the map"
+                        "description": "Zoom level of the map",
+                        "default": 12
                     }
                 },
-                "required": ["longitude", "latitude", "zoom"]
+                "required": ["place_name"]
             }
         }
-    },
-    {
-        "type": "function",
-        "function":  {
-            "name": "add_markers",
-            "description": "Add list of markers to the map",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "longitudes": {
-                        "type": "array",
-                        "items": {
-                            "type": "number"
-                        },
-                        "description": "List of longitudes for each marker"
-                    },
-                    "latitudes": {
-                        "type": "array",
-                        "items": {
-                            "type": "number"
-                        },
-                        "description": "List of latitudes for each marker"
-                    },
-                    "labels": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "description": "List of labels for each marker"
-                    }
-                },
-                "required": ["longitudes", "latitudes", "labels"]
-            }
-        }
-    },
+    }
 ]
