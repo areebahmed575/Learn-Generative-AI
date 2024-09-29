@@ -6,7 +6,7 @@ import json
 from openai import OpenAI
 from dotenv import load_dotenv, find_dotenv
 from typing import Literal
-from functions import available_functions
+from app.functions import available_functions
 
 
 load_dotenv(find_dotenv())

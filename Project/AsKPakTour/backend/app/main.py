@@ -1,10 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from assistant import Trip
-from functions import tools, INSTRUCTION
+from app.assistant import Trip
+from app.functions import tools, INSTRUCTION
 
-app = FastAPI()
+app = FastAPI( title="Weather API", 
+    version="0.0.1",
+    servers=[
+        {
+            "url": "http://127.0.0.1:8000", 
+            "description": "Development Server"
+        }
+        ])
 
 
 app.add_middleware(
