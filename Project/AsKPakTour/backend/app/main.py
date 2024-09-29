@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from Project.AsKPakTour.backend.app.assistant import Trip
-from Project.AsKPakTour.backend.app.functions import tools, INSTRUCTION
+from assistant import Trip
+from functions import tools, INSTRUCTION
 
 app = FastAPI()
 
