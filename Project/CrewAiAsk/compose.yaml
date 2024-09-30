@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  backends:
+     container_name: "backend"
+     hostname: "backend"
+     build:
+        context: ./backend
+     ports:       
+      - "8000:8000"
+     volumes: 
+      - ./backend:/code/ 
+     networks:
+      - my-api-net
+      
+         
+networks:
+  my-api-net:
+    driver: bridge
+       
+   
+
+     
+
+        
+
+  
+    
+
+
+
