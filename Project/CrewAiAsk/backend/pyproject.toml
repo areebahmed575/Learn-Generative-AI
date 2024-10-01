@@ -11,6 +11,10 @@ fastapi = "^0.115.0"
 uvicorn = {extras = ["standard"], version = "^0.31.0"}
 sqlmodel = "^0.0.22"
 crewai = "0.28.8"
+crewai-tools = "0.1.6"
+langchain-community = "0.0.29"
+openai = "^1.50.2"
+python-dotenv = "1.0.0"
 
 
 [build-system]
