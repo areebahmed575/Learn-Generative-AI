@@ -2,14 +2,14 @@ version: "3.9"
 
 services:
   backends:
-     container_name: "backend"
-     hostname: "backend"
+     container_name: "crewbackend"
+     hostname: "crewbackend"
      build:
-        context: ./backend
+        context: ./crewbackend
      ports:       
       - "8000:8000"
      volumes: 
-      - ./backend:/code/ 
+      - ./crewbackend:/code/ 
      networks:
       - my-api-net
       
