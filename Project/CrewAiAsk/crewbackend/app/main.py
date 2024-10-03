@@ -145,15 +145,22 @@ async def process_inputs(inputs_details: InputDetails):
 
     result = crew.kickoff(inputs=inputs_details.dict())
 
-
-    tasks_outputs = []
-    for task_output in result.tasks_output:
-        tasks_outputs.append(TaskOutput(
-            task_description=task_output.description,
-            task_output=task_output.raw
-        ))
-    combined_output = "\n\n".join([task.task_output for task in tasks_outputs])
-
+    
+    if isinstance(result, str):
+        
+        combined_output = result
+        tasks_outputs = []  
+    else:
+        tasks_outputs = []
+        for task_output in result.tasks_output:
+            tasks_outputs.append(TaskOutput(
+                task_description=task_output.description,
+                task_output=task_output.raw
+            ))
+        combined_output = "\n\n".join([task.task_output for task in tasks_outputs])
+        print("dir(task_output.output)",dir(task_output.output))
+        print("task_output.output",task_output.output)
+        print("type(task_output.output)",type(task_output.output))
 
     crew_result = CrewResult(
         combined_output=combined_output,

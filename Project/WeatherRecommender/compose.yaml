@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  backends:
+     container_name: "weatherbackend"
+     hostname: "weatherbackend"
+     build:
+        context: ./weatherbackend
+     ports:       
+      - "8000:8000"
+     volumes: 
+      - ./weatherbackend:/code/ 
+     networks:
+      - my-api-net
+      
+         
+networks:
+  my-api-net:
+    driver: bridge
+       
+   
+
+     
+
+        
+
+  
+    
+
+
+
