@@ -1,0 +1,64 @@
+{
+    "containerApps.deploymentConfigurations": [
+        {
+            "label": "backend",
+            "type": "AcrDockerBuildRequest",
+            "dockerfilePath": "backend\\Dockerfile",
+            "srcPath": "backend",
+            "envPath": "backend\\.env",
+            "resourceGroup": "askpaktour-env",
+            "containerApp": "backend",
+            "containerRegistry": "askpaktourenvb0138a"
+        },
+        {
+            "label": "backends",
+            "type": "AcrDockerBuildRequest",
+            "dockerfilePath": "backend\\Dockerfile",
+            "srcPath": "backend",
+            "envPath": "",
+            "resourceGroup": "askpaktour-env",
+            "containerApp": "backends",
+            "containerRegistry": "askpaktourenvb0138a"
+        },
+        {
+            "label": "backend",
+            "type": "AcrDockerBuildRequest",
+            "dockerfilePath": "backend\\Dockerfile",
+            "srcPath": "backend",
+            "envPath": "",
+            "resourceGroup": "askpaktour-env",
+            "containerApp": "backend",
+            "containerRegistry": "askpaktourenvb0138a"
+        },
+        {
+            "label": "backends",
+            "type": "AcrDockerBuildRequest",
+            "dockerfilePath": "backend\\Dockerfile",
+            "srcPath": "backend",
+            "envPath": "backend\\.env",
+            "resourceGroup": "askpaktour-env",
+            "containerApp": "backends",
+            "containerRegistry": "askpaktourenvb0138a"
+        },
+        {
+            "label": "backend",
+            "type": "AcrDockerBuildRequest",
+            "dockerfilePath": "backend\\Dockerfile",
+            "srcPath": "backend",
+            "envPath": "backend\\.env",
+            "resourceGroup": "askpaktour-env",
+            "containerApp": "backend",
+            "containerRegistry": "askpaktourenvb0138a"
+        },
+        {
+            "label": "backends",
+            "type": "AcrDockerBuildRequest",
+            "dockerfilePath": "backend\\Dockerfile",
+            "srcPath": "backend",
+            "envPath": "",
+            "resourceGroup": "askpaktour-env",
+            "containerApp": "backends",
+            "containerRegistry": "askpaktourenvb0138a"
+        }
+    ]
+}
