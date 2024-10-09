@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from app.assistant import Trip
 from app.functions import tools, INSTRUCTION
 
-app = FastAPI( title="Weather API", 
+app = FastAPI( title="Ask Pak tour API", 
     version="0.0.1",
     servers=[
         {
