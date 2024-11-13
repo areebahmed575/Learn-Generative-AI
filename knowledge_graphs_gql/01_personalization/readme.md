@@ -1,4 +1,4 @@
-Let’s simplify this idea. Think of how graph databases and generative AI work together to make learning more personalized, much like having a smart tutor who remembers everything about your learning journey and adapts as you progress. Here’s how it works:
+Think of how graph databases and generative AI work together to make learning more personalized, much like having a smart tutor who remembers everything about your learning journey and adapts as you progress. Here’s how it works:
 
 ### 1. Adaptive Learning Paths
 A graph database can help AI recommend what to learn next based on what you already know and what you still need to work on. It’s like the tutor tracking your strengths and weaknesses and suggesting lessons, exercises, or quizzes that focus on the areas you need most.
