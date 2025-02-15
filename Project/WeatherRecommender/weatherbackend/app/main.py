@@ -16,7 +16,7 @@ load_dotenv(find_dotenv())
 
 
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
-os.environ["OPENAI_MODEL_NAME"] = "gpt-4o-mini"  
+os.environ["OPENAI_MODEL_NAME"] = "gpt-3.5-turbo"  
 os.environ["SERPER_API_KEY"] = os.getenv("SERPER_API_KEY")
 
 
@@ -29,7 +29,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # for production
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
