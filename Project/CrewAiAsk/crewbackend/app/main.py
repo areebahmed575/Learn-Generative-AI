@@ -38,7 +38,6 @@ class InputDetails(SQLModel):
     budget: str
     interest: str
     duration: str
-    # flight_search: str
     hotel_search: str
     restaurant_search: str
 
@@ -67,6 +66,10 @@ async def process_inputs(inputs_details: InputDetails):
         url="https://www.booking.com",
         search_terms="hotels in user's destination"
     )
+    flight_tool = WebsiteSearchTool(
+        url="https://www.booking.com",
+        search_terms="hotels in user's destination"
+    )
     # flight_tool = WebsiteSearchTool(
     #     url="https://www.booking.com",
     #     search_terms="flights from your city to user's destination"
@@ -91,21 +94,21 @@ async def process_inputs(inputs_details: InputDetails):
     # )
 
     hotel_finder = Agent(
-        role="Hotel Search Expert",
-        goal="Find hotels near tourist destinations based on user preferences and budget.",
-        tools=[search_tool, scrape_tool],
-        verbose=True,
-        memory=True,
-        backstory="A travel expert proficient in finding the best hotels based on location, budget, and reviews."
+       role="Hotel Search Expert",
+       goal="Find the best hotels near tourist spots in Pakistan based on preferences and budget.",
+       tools=[hotel_tool],
+       verbose=True,
+       memory=True,
+       backstory="An expert in finding the most suitable hotels."
     )
 
     restaurant_finder = Agent(
-        role="Restaurant Search Expert",
-        goal="Find the best restaurants near tourist spots based on user preferences (cuisine, price).",
-        tools=[search_tool, scrape_tool],
-        verbose=True,
-        memory=True,
-        backstory="An expert food guide with the ability to find restaurants based on cuisine preferences, ratings, and budget."
+      role="Restaurant Search Expert",
+      goal="Find the best restaurants near tourist destinations in Pakistan.",
+      tools=[restaurant_tool,search_tool],
+      verbose=True,
+      memory=True,
+      backstory="An expert in identifying top-rated restaurants."
     )
 
    
@@ -122,15 +125,15 @@ async def process_inputs(inputs_details: InputDetails):
     # )
 
     hotel_search_task = Task(
-        description=f"Search for {inputs_details.hotel_search} near the tourist destination based on user preferences (location, price range, and duration).",
-        expected_output=f"List of {inputs_details.hotel_search} near the tourist destination with ratings, prices, and booking links.",
-        agent=hotel_finder
+      description=f"Search for {inputs_details.hotel_search} near tourist destinations in Pakistan.",
+      expected_output="List of hotels with prices, ratings, and amenities near the tourist destinations in Pakistan.",
+      agent=hotel_finder
     )
 
     restaurant_search_task = Task(
-        description=f"Find {inputs_details.restaurant_search} near the tourist destination, based on user preferences (cuisine, price).",
-        expected_output=f"List of nearby {inputs_details.restaurant_search} with reviews, price ranges, and cuisine type.",
-        agent=restaurant_finder
+      description=f"Find {inputs_details.restaurant_search} near top tourist destinations in Pakistan.",
+      expected_output="List of restaurants with cuisines, ratings, and price ranges.",
+      agent=restaurant_finder
     )
 
     
@@ -156,3 +159,4 @@ async def process_inputs(inputs_details: InputDetails):
 
     logging.info("Processing completed")
     return crew_result
+
