@@ -1,0 +1,47 @@
+import os  # file paths
+from langchain_text_splitters import (
+    RecursiveCharacterTextSplitter,
+)  # chops docs into chunks
+from langchain_community.document_loaders.sitemap import (
+    SitemapLoader,
+)  # downloads web pages
+from langchain_community.vectorstores import SKLearnVectorStore  # the vector database
+from langchain_openai import (
+    OpenAIEmbeddings,
+)  # turns text → numbers  # turns text → numbers
+
+
+def get_vector_db_retriever():
+    persist_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "resources", "union.parquet"
+    )
+    embd = OpenAIEmbeddings()
+
+    # If vector store exists, then load it
+    if os.path.exists(persist_path):
+        vectorstore = SKLearnVectorStore(
+            embedding=embd, persist_path=persist_path, serializer="parquet"
+        )
+        return vectorstore.as_retriever(lambda_mult=0)
+
+    # Otherwise, index LangSmith documents and create new vector store
+    ls_docs_sitemap_loader = SitemapLoader(
+        web_path="https://docs.langchain.com/sitemap.xml",
+        filter_urls=["https://docs.langchain.com/langsmith/"],
+        continue_on_failure=True,
+    )
+    ls_docs = ls_docs_sitemap_loader.load()
+
+    text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+        chunk_size=500, chunk_overlap=0
+    )
+    doc_splits = text_splitter.split_documents(ls_docs)
+
+    vectorstore = SKLearnVectorStore.from_documents(
+        documents=doc_splits,
+        embedding=embd,
+        persist_path=persist_path,
+        serializer="parquet",
+    )
+    vectorstore.persist()
+    return vectorstore.as_retriever(lambda_mult=0)

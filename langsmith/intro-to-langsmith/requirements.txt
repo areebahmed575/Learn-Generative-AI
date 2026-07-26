@@ -1,0 +1,15 @@
+langchain
+langgraph
+langgraph-sdk
+langgraph-checkpoint-sqlite
+langsmith>=0.8.18
+langchain-community
+langchain-core
+langchain-openai
+langchain-text-splitters
+notebook
+python-dotenv>=1.2.2
+lxml
+scikit-learn
+pandas
+pyarrow
